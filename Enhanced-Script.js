@@ -1,9 +1,10 @@
 // ==UserScript==
-// @name         E-Hentai 实用增强：回顶/到底 + 全站手动暗色（含Monster/上传/种子/统计/收藏页）
-// @name:en      E-Hentai Tweaks: Scroll Buttons + Full Manual Dark (Monster/Upload/Torrents/Stats/Favorites)
+// @name         E-Hentai 实用增强：回顶/到底 + [ ] 翻页 + 暗色模式
+// @name:en      E-Hentai Tweaks: Scroll Buttons + [ ] Paging + Dark Mode
 // @namespace    https://greasyfork.org/users/1508871-vesper233
 // @version      2.6
-// @description  悬浮回顶/到底；全站 [ 与 ] 快捷翻页；手动暗色（持久化 & 跨 *.e-hentai.org 同步）。覆盖首页/列表/详情/图片/评论/torrents/stats/上传管理/收藏页，并修复“遭遇怪物”提示在暗色下不可读的问题。仅小写 d 切换暗色。
+// @description  悬浮回顶/到底；全站 [ 与 ] 快捷翻页；暗色模式
+// @description:en   Scroll to Top/Bottom buttons; [ and ] for Prev/Next page; Dark Mode
 // @author       Vesper233
 // @match        *://e-hentai.org/*
 // @match        *://exhentai.org/*
@@ -103,6 +104,11 @@
     html.eh-dark table.itg{ border:2px ridge #3c3c3c !important; }
     html.eh-dark table.itg > tbody > tr:nth-child(2n+1){ background:#363940 !important; }
     html.eh-dark table.itg > tbody > tr:nth-child(2n+2){ background:#3c414b !important; }
+    html.eh-dark div.itg.gld,
+    html.eh-dark .itg.gld{
+      border-left:none !important;
+      background:var(--eh-panel) !important;
+    }
     html.eh-dark table.mt{ border:1px solid var(--eh-border) !important; background:#40454b !important; }
     html.eh-dark table.mt > tbody > tr:nth-child(2n+1){ background:#363940 !important; }
     html.eh-dark table.mt > tbody > tr:nth-child(2n+2){ background:#3c414b !important; }
@@ -121,7 +127,7 @@
     }
     html.eh-dark hr{ border-color:var(--eh-border) !important; background:var(--eh-border) !important; }
     html.eh-dark .glname, html.eh-dark .glname a{ color:var(--eh-fg) !important; }
-    html.eh-dark .gl1t{ border-right:1px solid #6f6f6f4d !important; border-bottom:1px solid #6f6f6f4d !important; }
+    html.eh-dark .gl1t{ border:none !important; }
     html.eh-dark .gl1t:nth-child(2n+1){ background:#363940 !important; }
     html.eh-dark .gl1t:nth-child(2n+2){ background:#3c414b !important; }
     html.eh-dark .gl3t,
@@ -363,20 +369,57 @@
     document.dispatchEvent(ev); window.dispatchEvent(ev);
   };
 
+  const followNavElement = (el) => {
+    if (!el) return false;
+
+    // If the element itself is a link-like node, try to act on it directly.
+    if (el.matches?.('td[onclick*="document.location"]')) {
+      el.click();
+      return true;
+    }
+
+    if (el.matches?.('a[href]')) {
+      const href = el.getAttribute('href');
+      if (!href) return false;
+      const onclickAttr = el.getAttribute('onclick');
+      if (onclickAttr && /return\s+false/i.test(onclickAttr)) {
+        location.href = href;
+        return true;
+      }
+      el.click();
+      return true;
+    }
+
+    // Some wrappers (like #dprev/#dnext TD/Div) contain an anchor child.
+    const anchorChild = el.querySelector?.('a[href]');
+    if (anchorChild) return followNavElement(anchorChild);
+
+    const href = el.getAttribute?.('href');
+    if (href) {
+      location.href = href;
+      return true;
+    }
+
+    return false;
+  };
+
   const gotoPrevNextPage = (isNext) => {
-    const pagers = Array.from(document.querySelectorAll('table.ptt, table.ptb, .searchnav'));
-    if (!pagers.length) return false;
+    const pagers = Array.from(document.querySelectorAll('table.ptt, table.ptb, .searchnav, #dprev, #dnext, .dprev, .dnext'));
 
     const wantNext = isNext;
     const nextRegex = /(next|>>|»|>)/i;
     const prevRegex = /(prev|<<|«|<)/i;
 
     for (const pager of pagers) {
-      const links = Array.from(pager.querySelectorAll('a[href], span[id^="u"]')); // 兼容 favorites 的导航
+      const links = [];
+      if (pager.matches?.('a[href], span[id^="u"], td[onclick*="document.location"]')) links.push(pager);
+      links.push(...pager.querySelectorAll?.('a[href], span[id^="u"], td[onclick*="document.location"]') || []);
       if (!links.length) continue;
 
       const primary = links.find(a => (wantNext ? /next/i.test(a.textContent) : /prev/i.test(a.textContent)));
-      if (primary && primary.tagName === 'A') { primary.click(); return true; }
+      if (primary) {
+        if (followNavElement(primary)) return true;
+      }
 
       // 兼容 favorites 上方的 span#uprev/#unext（需要触发它的 href）
       if (!primary) {
@@ -385,8 +428,14 @@
       }
 
       const fallback = links.find(a => (wantNext ? nextRegex.test(a.textContent) : prevRegex.test(a.textContent)));
-      if (fallback && fallback.tagName === 'A') { fallback.click(); return true; }
+      if (fallback) {
+        if (followNavElement(fallback)) return true;
+      }
     }
+
+    // Direct fallbacks for dprev/dnext outside of the pagers list
+    const direct = document.querySelector(isNext ? '#dnext a[href], #dnext' : '#dprev a[href], #dprev');
+    if (direct && followNavElement(direct)) return true;
     return false;
   };
 
