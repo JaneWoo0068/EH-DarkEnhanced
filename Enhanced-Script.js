@@ -1,10 +1,10 @@
 // ==UserScript==
-// @name         E-Hentai 实用增强：一键顶/底+暗色模式增强
-// @name:en      E-Hentai Tweaks: scroller to top pr bottom +darkmode enhanced 
-// @namespace    https://greasyfork.org/zh-CN/users/1508871-vesper233
+// @name         E-Hentai 实用增强：回顶/到底 + [ ] 翻页 + 全站手动暗色（含Monster/上传/种子/统计/收藏页）
+// @name:en      E-Hentai Tweaks: Scroll Buttons + [ ] Paging + Full Manual Dark (Monster/Upload/Torrents/Stats/Favorites)
+// @namespace    https://greasyfork.org/users/1508871-vesper233
 // @version      2.6
 // @description  悬浮回顶/到底；全站 [ 与 ] 快捷翻页；手动暗色（持久化 & 跨 *.e-hentai.org 同步）。覆盖首页/列表/详情/图片/评论/torrents/stats/上传管理/收藏页，并修复“遭遇怪物”提示在暗色下不可读的问题。仅小写 d 切换暗色。
-// @author       Vesper233
+// @author       Vesper
 // @match        *://e-hentai.org/*
 // @match        *://exhentai.org/*
 // @match        *://*.e-hentai.org/*
@@ -131,9 +131,33 @@
     html.eh-dark .gl7t,
     html.eh-dark .glthumb > div[style*="position:absolute"],
     html.eh-dark .glthumb > div.gl3t{
-      background:var(--eh-panel-3) !important;
+      background:var(--eh-bg) !important;
       color:var(--eh-fg) !important;
       border:1px solid var(--eh-border) !important;
+      box-shadow:none !important;
+    }
+    html.eh-dark .lc > span,
+    html.eh-dark .lr > span{
+      background-color:var(--eh-bg) !important;
+      border:2px solid #8d8d8d !important;
+    }
+    html.eh-dark .lc > span:after{
+      border:solid var(--eh-fg) !important;
+    }
+    html.eh-dark .lr > span:after{
+      background:var(--eh-fg) !important;
+    }
+    html.eh-dark .lc:hover input:enabled ~ span,
+    html.eh-dark .lr:hover input:enabled ~ span,
+    html.eh-dark .lc input:enabled:focus ~ span,
+    html.eh-dark .lr input:enabled:focus ~ span{
+      background-color:var(--eh-panel-3) !important;
+      border-color:#aeaeae !important;
+    }
+    html.eh-dark .lc input:disabled ~ span,
+    html.eh-dark .lr input:disabled ~ span{
+      border-color:#5c5c5c !important;
+      background-color:#2c2d32 !important;
     }
 
     /* ===== 画廊详情/缩略图区/信息条 ===== */
@@ -188,7 +212,7 @@
     /* ====== 收藏页 favorites.php：分类 pill / Show All ====== */
     /* 直接适配原生结构：div.fp / div.fp.fps */
     html.eh-dark .fp{
-      background:var(--eh-panel-2) !important;
+      background:transparent !important;
       color:var(--eh-fg) !important;
       border:none !important;
       border-radius:16px !important;
@@ -197,13 +221,13 @@
       background:var(--eh-panel-3) !important;
     }
     html.eh-dark .fps{
-      background:var(--eh-panel-3) !important;
+      background:transparent !important;
       border:none !important;
       font-weight:600 !important;
     }
     /* 兼容你此前的自定义类（两套选择器都可用） */
     html.eh-dark .eh-dark-favpill{
-      background:var(--eh-panel-2) !important;
+      background:transparent !important;
       color:var(--eh-fg) !important;
       border:none !important;
       box-shadow:none !important;
@@ -393,4 +417,3 @@
   }, { passive:false });
 
 })();
-
