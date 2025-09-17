@@ -1,10 +1,10 @@
 // ==UserScript==
-// @name         E-Hentai 实用增强：回顶/到底 + [ ] 翻页 + 全站手动暗色（含Monster/上传/种子/统计/收藏页）
-// @name:en      E-Hentai Tweaks: Scroll Buttons + [ ] Paging + Full Manual Dark (Monster/Upload/Torrents/Stats/Favorites)
+// @name         E-Hentai 实用增强：回顶/到底 + 全站手动暗色（含Monster/上传/种子/统计/收藏页）
+// @name:en      E-Hentai Tweaks: Scroll Buttons + Full Manual Dark (Monster/Upload/Torrents/Stats/Favorites)
 // @namespace    https://greasyfork.org/users/1508871-vesper233
 // @version      2.6
 // @description  悬浮回顶/到底；全站 [ 与 ] 快捷翻页；手动暗色（持久化 & 跨 *.e-hentai.org 同步）。覆盖首页/列表/详情/图片/评论/torrents/stats/上传管理/收藏页，并修复“遭遇怪物”提示在暗色下不可读的问题。仅小写 d 切换暗色。
-// @author       Vesper
+// @author       Vesper233
 // @match        *://e-hentai.org/*
 // @match        *://exhentai.org/*
 // @match        *://*.e-hentai.org/*
