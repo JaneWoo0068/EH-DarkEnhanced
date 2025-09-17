@@ -1,10 +1,10 @@
 // ==UserScript==
-// @name         E-Hentai 实用增强：回顶/到底 + [ ] 翻页 + 全站手动暗色（含Monster/上传/种子/统计/收藏页）
-// @name:en      E-Hentai Tweaks: Scroll Buttons + [ ] Paging + Full Manual Dark (Monster/Upload/Torrents/Stats/Favorites)
-// @namespace    https://greasyfork.org/users/your-name
+// @name         E-Hentai 实用增强：一键顶/底+暗色模式增强
+// @name:en      E-Hentai Tweaks: scroller to top pr bottom +darkmode enhanced 
+// @namespace    https://greasyfork.org/zh-CN/users/1508871-vesper233
 // @version      2.6
 // @description  悬浮回顶/到底；全站 [ 与 ] 快捷翻页；手动暗色（持久化 & 跨 *.e-hentai.org 同步）。覆盖首页/列表/详情/图片/评论/torrents/stats/上传管理/收藏页，并修复“遭遇怪物”提示在暗色下不可读的问题。仅小写 d 切换暗色。
-// @author       Vesper
+// @author       Vesper233
 // @match        *://e-hentai.org/*
 // @match        *://exhentai.org/*
 // @match        *://*.e-hentai.org/*
@@ -124,6 +124,17 @@
     html.eh-dark .gl1t{ border-right:1px solid #6f6f6f4d !important; border-bottom:1px solid #6f6f6f4d !important; }
     html.eh-dark .gl1t:nth-child(2n+1){ background:#363940 !important; }
     html.eh-dark .gl1t:nth-child(2n+2){ background:#3c414b !important; }
+    html.eh-dark .gl3t,
+    html.eh-dark .gl4t,
+    html.eh-dark .gl5t,
+    html.eh-dark .gl6t,
+    html.eh-dark .gl7t,
+    html.eh-dark .glthumb > div[style*="position:absolute"],
+    html.eh-dark .glthumb > div.gl3t{
+      background:var(--eh-panel-3) !important;
+      color:var(--eh-fg) !important;
+      border:1px solid var(--eh-border) !important;
+    }
 
     /* ===== 画廊详情/缩略图区/信息条 ===== */
     html.eh-dark #gmid, html.eh-dark #gd2, html.eh-dark #gdt, html.eh-dark .sni{ background:var(--eh-panel) !important; }
@@ -179,24 +190,23 @@
     html.eh-dark .fp{
       background:var(--eh-panel-2) !important;
       color:var(--eh-fg) !important;
-      border:1px solid var(--eh-border) !important;
+      border:none !important;
       border-radius:16px !important;
     }
     html.eh-dark .fp:hover{
       background:var(--eh-panel-3) !important;
-      border-color:var(--eh-border) !important;
     }
     html.eh-dark .fps{
       background:var(--eh-panel-3) !important;
-      border:1px solid var(--eh-border) !important;
+      border:none !important;
       font-weight:600 !important;
     }
     /* 兼容你此前的自定义类（两套选择器都可用） */
     html.eh-dark .eh-dark-favpill{
       background:var(--eh-panel-2) !important;
       color:var(--eh-fg) !important;
-      border:1px solid var(--eh-border) !important;
-      box-shadow:inset 0 0 0 1px rgba(0,0,0,.18);
+      border:none !important;
+      box-shadow:none !important;
       border-radius:16px !important;
     }
     html.eh-dark .eh-dark-favpill a{ color:var(--eh-fg) !important; }
@@ -383,3 +393,4 @@
   }, { passive:false });
 
 })();
+
