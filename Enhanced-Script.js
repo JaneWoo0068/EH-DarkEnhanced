@@ -2,7 +2,7 @@
 // @name         E-Hentai 实用增强：回顶/到底 + [ ] 翻页 + 暗色模式
 // @name:en      E-Hentai Tweaks: Scroll Buttons + [ ] Paging + Dark Mode
 // @namespace    https://greasyfork.org/users/1508871-vesper233
-// @version      2.6
+// @version      3.1
 // @description  悬浮回顶/到底；全站 [ 与 ] 快捷翻页；暗色模式
 // @description:en   Scroll to Top/Bottom buttons; [ and ] for Prev/Next page; Dark Mode
 // @author       Vesper233
@@ -172,15 +172,40 @@
     html.eh-dark h1#gj{ color:#b8b8b8 !important; border-bottom:1px solid var(--eh-border) !important; }
 
     /* ===== 评论区 ===== */
-    html.eh-dark #cdiv{ background:var(--eh-panel) !important; border:1px solid var(--eh-border) !important; color:var(--eh-fg) !important; }
-    html.eh-dark #cdiv .c1{ background:var(--eh-panel-2) !important; border:1px solid var(--eh-border) !important; }
-    html.eh-dark #cdiv .c3, html.eh-dark #cdiv .c3 a{ background:var(--eh-panel-3) !important; color:var(--eh-fg) !important; }
-    html.eh-dark #cdiv .c6{ color:var(--eh-fg) !important; background:transparent !important; }
-    html.eh-dark #cdiv .c7, html.eh-dark #cdiv .c7 a{ background:var(--eh-bg) !important; color:var(--eh-fg) !important; }
-    html.eh-dark #newpost, html.eh-dark #newcomment, html.eh-dark #cdiv textarea{
-      background:var(--eh-bg) !important; color:var(--eh-fg) !important; border-color:#8d8d8d !important;
+    html.eh-dark #cdiv{
+      background:var(--eh-panel) !important;
+      color:var(--eh-fg) !important;
     }
-
+    html.eh-dark #cdiv .c1{
+      background:var(--eh-panel) !important;
+      color:var(--eh-fg) !important;
+      border:none !important;
+    }
+    html.eh-dark #cdiv .c2{
+      background:var(--eh-bg) !important;
+      color:var(--eh-fg) !important;
+      border:none !important;
+      border-radius:2px !important;
+    }
+    html.eh-dark #cdiv .c3,
+    html.eh-dark #cdiv .c4,
+    html.eh-dark #cdiv .c5{
+      background:transparent !important;
+      color:var(--eh-fg) !important;
+    }
+    html.eh-dark #cdiv .c5 span{ color:var(--eh-fg) !important; }
+    html.eh-dark #cdiv .c6,
+    html.eh-dark #cdiv .c7{
+      background:var(--eh-panel) !important;
+      color:var(--eh-fg) !important;
+    }
+    html.eh-dark #postnewcomment,
+    html.eh-dark #formdiv,
+    html.eh-dark #formdiv textarea,
+    html.eh-dark #formdiv input[type="submit"]{
+      background:var(--eh-panel) !important;
+      color:var(--eh-fg) !important;
+    }
     /* ===== torrents（gallerytorrents.php & torrents.php）===== */
     html.eh-dark table#ett, html.eh-dark div#etd{ background:#43464e !important; border:1px solid #34353b !important; }
     html.eh-dark #torrentinfo > div + div{ border-top-color:var(--eh-border) !important; }
