@@ -185,7 +185,8 @@
       background:var(--eh-bg) !important;
       color:var(--eh-fg) !important;
       border:none !important;
-      border-radius:2px !important;
+      padding:6px 14px !important;
+      border-radius:4px !important;
     }
     html.eh-dark #cdiv .c3,
     html.eh-dark #cdiv .c4,
