@@ -203,12 +203,24 @@
     html.eh-dark #hathdl_form + table td{ border-color:var(--eh-fg) !important; }
     html.eh-dark div#db{ border:1px solid var(--eh-border) !important; background:var(--eh-panel) !important; }
 
+    /* ===== 日常事件 / 遭遇提示面板 ===== */
+    html.eh-dark #eventpane{
+      background:var(--eh-panel) !important;
+      border:1px solid var(--eh-border) !important;
+      color:var(--eh-fg) !important;
+    }
+    html.eh-dark #eventpane p,
+    html.eh-dark #eventpane strong{
+      color:var(--eh-fg) !important;
+    }
+
     /* ====== 遭遇怪物（Monster Encounter）===== */
-    html.eh-dark .eh-dark-monbox{
+    html.eh-dark .eh-dark-monbox,
+    html.eh-dark .eh-dark-moonbox{
       background:var(--eh-panel) !important;
       color:var(--eh-fg) !important;
-      border:1px solid var(--eh-border) !important;
-      box-shadow:inset 0 0 0 1px rgba(0,0,0,.25);
+      border:none !important;
+      box-shadow:none !important;
     }
     html.eh-dark .eh-dark-monbox a{ color:var(--eh-link) !important; text-decoration:underline; }
     html.eh-dark #monsterpane,
