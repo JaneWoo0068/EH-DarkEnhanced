@@ -2,7 +2,7 @@
 // @name         E-Hentai 实用增强：回顶/到底 + [ ] 翻页 + 自动主题切换
 // @name:en      E-Hentai Tweaks: Scroll Buttons + [ ] Paging + Auto Theme Switching
 // @namespace    https://greasyfork.org/users/1508871-vesper233
-// @version      4.0
+// @version      4.3
 // @description  悬浮回顶/到底；全站 [ 与 ] 快捷翻页；自动主题切换
 // @description:en   Scroll to Top/Bottom buttons; [ and ] for Prev/Next page; Auto Theme Switching
 // @author       Vesper233
@@ -35,6 +35,10 @@
   const MODE_LIGHT = 'light';
   const MODE_SEQUENCE = [MODE_AUTO, MODE_DARK, MODE_LIGHT];
   const mediaQuery = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
+  const LIGHT_BG = '#E2E0D2';
+  const LIGHT_TEXT = '#1f1f1f';
+  const DARK_BG = '#34353A';
+  const DARK_TEXT = '#f1f1f1';
   let currentMode;
   let systemListenerAttached = false;
   let darkToggleBtn;
@@ -88,6 +92,29 @@
     }
   };
 
+  const updateToggleVisual = (mode, effective) => {
+    if (!darkToggleBtn) return;
+    darkToggleBtn.style.border = 'none';
+    let shadow = '0 0 0 1px rgba(0,0,0,0.45)';
+    if (mode === MODE_AUTO) {
+      darkToggleBtn.style.background = `linear-gradient(90deg, ${LIGHT_BG} 0 50%, ${DARK_BG} 50% 100%)`;
+      darkToggleBtn.style.color = DARK_TEXT;
+      shadow = '0 0 0 1px rgba(0,0,0,0.35)';
+      darkToggleBtn.style.textShadow = '0 0 4px rgba(0,0,0,0.35)';
+    } else if (mode === MODE_LIGHT) {
+      darkToggleBtn.style.background = LIGHT_BG;
+      darkToggleBtn.style.color = LIGHT_TEXT;
+      darkToggleBtn.style.textShadow = 'none';
+      shadow = '0 0 0 1px rgba(0,0,0,0.25)';
+    } else {
+      darkToggleBtn.style.background = DARK_BG;
+      darkToggleBtn.style.color = DARK_TEXT;
+      darkToggleBtn.style.textShadow = 'none';
+      shadow = '0 0 0 1px rgba(255,255,255,0.25)';
+    }
+    darkToggleBtn.style.boxShadow = shadow;
+  };
+
   const updateToggleTooltip = (mode, effective) => {
     if (!darkToggleBtn) return;
     const labels = {
@@ -108,6 +135,7 @@
     if (persist) localStorage.setItem(MODE_KEY, mode);
     updateSystemListener();
     updateToggleTooltip(mode, effective);
+    updateToggleVisual(mode, effective);
     fixMonsterBox();
     fixFavoritesUI();
   };
@@ -131,11 +159,12 @@
     .eh-scroll-btn{
       position:fixed; width:45px; height:45px;
       background-color:#3e3e3e; color:#dcdcdc;
-      border:1px solid #5a5a5a; border-radius:50%;
+      border:none; border-radius:50%;
       cursor:pointer; display:none; justify-content:center; align-items:center;
       font-size:20px; font-weight:bold; z-index:9999; opacity:.85;
       transition:opacity .2s ease, background-color .2s ease, transform .1s ease;
       user-select:none; backdrop-filter:saturate(120%) blur(2px);
+      box-shadow:0 0 0 1px rgba(255,255,255,0.08);
     }
     .eh-scroll-btn:hover{ opacity:1; background-color:#575757; transform:translateY(-1px); }
     #eh-to-top-btn{ right:25px; bottom:130px; }
