@@ -1,10 +1,10 @@
 // ==UserScript==
-// @name         E-Hentai 实用增强：回顶/到底 + [ ] 翻页 + 暗色模式
-// @name:en      E-Hentai Tweaks: Scroll Buttons + [ ] Paging + Dark Mode
+// @name         E-Hentai 实用增强：回顶/到底 + [ ] 翻页 + 自动主题切换
+// @name:en      E-Hentai Tweaks: Scroll Buttons + [ ] Paging + Auto Theme Switching
 // @namespace    https://greasyfork.org/users/1508871-vesper233
-// @version      3.1
-// @description  悬浮回顶/到底；全站 [ 与 ] 快捷翻页；暗色模式
-// @description:en   Scroll to Top/Bottom buttons; [ and ] for Prev/Next page; Dark Mode
+// @version      4.3
+// @description  悬浮回顶/到底；全站 [ 与 ] 快捷翻页；自动主题切换
+// @description:en   Scroll to Top/Bottom buttons; [ and ] for Prev/Next page; Auto Theme Switching
 // @author       Vesper233
 // @match        *://e-hentai.org/*
 // @match        *://exhentai.org/*
@@ -29,6 +29,19 @@
 
   const LS_KEY = 'eh-dark-mode-enabled';
   const CK_KEY = 'eh_dark';
+  const MODE_KEY = 'eh-dark-mode-pref';
+  const MODE_AUTO = 'auto';
+  const MODE_DARK = 'dark';
+  const MODE_LIGHT = 'light';
+  const MODE_SEQUENCE = [MODE_AUTO, MODE_DARK, MODE_LIGHT];
+  const mediaQuery = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
+  const LIGHT_BG = '#E2E0D2';
+  const LIGHT_TEXT = '#1f1f1f';
+  const DARK_BG = '#34353A';
+  const DARK_TEXT = '#f1f1f1';
+  let currentMode;
+  let systemListenerAttached = false;
+  let darkToggleBtn;
 
   const readCookie = (k) =>
     document.cookie.split('; ').find(s => s.startsWith(k + '='))?.split('=')[1];
@@ -55,13 +68,87 @@
     return null;
   };
 
-  const initDarkPref = () => {
-    let pref = getPref();
-    if (pref === null) { // 默认开启暗色
-      pref = true;
-      setPref(pref);
+  const resolveSystemDark = () => mediaQuery ? mediaQuery.matches : true;
+
+  const resolveEffectiveMode = (mode) => {
+    if (mode === MODE_AUTO) return resolveSystemDark() ? MODE_DARK : MODE_LIGHT;
+    return mode === MODE_LIGHT ? MODE_LIGHT : MODE_DARK;
+  };
+
+  const updateSystemListener = () => {
+    if (!mediaQuery) return;
+    const handler = (event) => {
+      if (currentMode === MODE_AUTO) applyMode(MODE_AUTO, { persist: false });
+    };
+    if (currentMode === MODE_AUTO && !systemListenerAttached) {
+      if (mediaQuery.addEventListener) mediaQuery.addEventListener('change', handler);
+      else mediaQuery.addListener(handler);
+      systemListenerAttached = handler;
     }
-    applyDark(pref);
+    if (currentMode !== MODE_AUTO && systemListenerAttached) {
+      if (mediaQuery.removeEventListener) mediaQuery.removeEventListener('change', systemListenerAttached);
+      else mediaQuery.removeListener(systemListenerAttached);
+      systemListenerAttached = false;
+    }
+  };
+
+  const updateToggleVisual = (mode, effective) => {
+    if (!darkToggleBtn) return;
+    darkToggleBtn.style.border = 'none';
+    let shadow = '0 0 0 1px rgba(0,0,0,0.45)';
+    if (mode === MODE_AUTO) {
+      darkToggleBtn.style.background = `linear-gradient(90deg, ${LIGHT_BG} 0 50%, ${DARK_BG} 50% 100%)`;
+      darkToggleBtn.style.color = DARK_TEXT;
+      shadow = '0 0 0 1px rgba(0,0,0,0.35)';
+      darkToggleBtn.style.textShadow = '0 0 4px rgba(0,0,0,0.35)';
+    } else if (mode === MODE_LIGHT) {
+      darkToggleBtn.style.background = LIGHT_BG;
+      darkToggleBtn.style.color = LIGHT_TEXT;
+      darkToggleBtn.style.textShadow = 'none';
+      shadow = '0 0 0 1px rgba(0,0,0,0.25)';
+    } else {
+      darkToggleBtn.style.background = DARK_BG;
+      darkToggleBtn.style.color = DARK_TEXT;
+      darkToggleBtn.style.textShadow = 'none';
+      shadow = '0 0 0 1px rgba(255,255,255,0.25)';
+    }
+    darkToggleBtn.style.boxShadow = shadow;
+  };
+
+  const updateToggleTooltip = (mode, effective) => {
+    if (!darkToggleBtn) return;
+    const labels = {
+      [MODE_AUTO]: '系统偏好',
+      [MODE_DARK]: '固定暗色',
+      [MODE_LIGHT]: '固定亮色'
+    };
+    const effectiveLabel = effective === MODE_DARK ? '暗色' : '亮色';
+    darkToggleBtn.title = `当前：${labels[mode]} (实际：${effectiveLabel})\n点击切换模式`;
+  };
+
+  const applyMode = (mode, { persist = true } = {}) => {
+    currentMode = mode;
+    const effective = resolveEffectiveMode(mode);
+    const isDark = effective === MODE_DARK;
+    applyDark(isDark);
+    setPref(isDark);
+    if (persist) localStorage.setItem(MODE_KEY, mode);
+    updateSystemListener();
+    updateToggleTooltip(mode, effective);
+    updateToggleVisual(mode, effective);
+    fixMonsterBox();
+    fixFavoritesUI();
+  };
+
+  const readInitialMode = () => {
+    const stored = localStorage.getItem(MODE_KEY);
+    if (stored === MODE_AUTO || stored === MODE_DARK || stored === MODE_LIGHT) return stored;
+    return MODE_AUTO;
+  };
+
+  const initDarkPref = () => {
+    const initialMode = readInitialMode();
+    applyMode(initialMode, { persist: true });
   };
 
   /* =========================
@@ -72,11 +159,12 @@
     .eh-scroll-btn{
       position:fixed; width:45px; height:45px;
       background-color:#3e3e3e; color:#dcdcdc;
-      border:1px solid #5a5a5a; border-radius:50%;
+      border:none; border-radius:50%;
       cursor:pointer; display:none; justify-content:center; align-items:center;
       font-size:20px; font-weight:bold; z-index:9999; opacity:.85;
       transition:opacity .2s ease, background-color .2s ease, transform .1s ease;
       user-select:none; backdrop-filter:saturate(120%) blur(2px);
+      box-shadow:0 0 0 1px rgba(255,255,255,0.08);
     }
     .eh-scroll-btn:hover{ opacity:1; background-color:#575757; transform:translateY(-1px); }
     #eh-to-top-btn{ right:25px; bottom:130px; }
@@ -224,6 +312,8 @@
     html.eh-dark [id^="cell_"]{ background:#5f636b !important; border:1px solid #34353b !important; }
     html.eh-dark .gb, html.eh-dark .gl, html.eh-dark .gf{ background:var(--eh-panel) !important; }
     html.eh-dark .m_btn, html.eh-dark .uf_btn{ background:var(--eh-bg) !important; color:var(--eh-fg) !important; border:1px solid #8d8d8d !important; }
+    html.eh-dark tr.gtr td.l,
+    html.eh-dark tr.gtr td.r{ border-right:none !important; }
 
     /* ===== 归档/下载（archiver.php）===== */
     html.eh-dark #hathdl_form + table td{ border-color:var(--eh-fg) !important; }
@@ -301,7 +391,7 @@
   };
   const toTopBtn = makeBtn('eh-to-top-btn', '▲', '回到顶部');
   const toBottomBtn = makeBtn('eh-to-bottom-btn', '▼', '直达底部');
-  const darkToggleBtn = makeBtn('eh-dark-toggle-btn', '🌓', '切换暗色（快捷键：d，小写）', {display:'flex'});
+  darkToggleBtn = makeBtn('eh-dark-toggle-btn', '🌓', '主题模式：系统/暗色/亮色（快捷键：d）', {display:'flex'});
 
   toTopBtn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
   toBottomBtn.addEventListener('click', () => window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'smooth' }));
@@ -318,13 +408,14 @@
   /* =========================
    *     暗色开关（仅小写 d）
    * ========================= */
-  const toggleDark = () => {
-    const next = !(localStorage.getItem(LS_KEY) === '1' || readCookie(CK_KEY) === '1');
-    setPref(next); applyDark(next);
+  const cycleMode = () => {
+    const idx = MODE_SEQUENCE.indexOf(currentMode);
+    const nextMode = MODE_SEQUENCE[(idx + 1) % MODE_SEQUENCE.length];
+    applyMode(nextMode);
     fixMonsterBox();
     fixFavoritesUI();
   };
-  darkToggleBtn.addEventListener('click', toggleDark);
+  darkToggleBtn.addEventListener('click', cycleMode);
   initDarkPref();
   onScroll();
 
@@ -483,7 +574,7 @@
     // 仅小写 d，且不带修饰键
     if (e.key === 'd' && !e.ctrlKey && !e.metaKey && !e.altKey && !e.shiftKey) {
       e.preventDefault();
-      toggleDark();
+      cycleMode();
       return;
     }
 
@@ -504,3 +595,4 @@
   }, { passive:false });
 
 })();
+
