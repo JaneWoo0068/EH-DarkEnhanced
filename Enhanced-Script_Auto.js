@@ -2,7 +2,7 @@
 // @name         E-Hentai 实用增强：回顶/到底 + [ ] 翻页 + 自动主题切换
 // @name:en      E-Hentai Tweaks: Scroll Buttons + [ ] Paging + Auto Theme Switching
 // @namespace    https://greasyfork.org/users/1508871-vesper233
-// @version      4.3
+// @version      4.3.1
 // @description  悬浮回顶/到底；全站 [ 与 ] 快捷翻页；自动主题切换
 // @description:en   Scroll to Top/Bottom buttons; [ and ] for Prev/Next page; Auto Theme Switching
 // @author       Vesper233
@@ -13,6 +13,7 @@
 // @match        *://upload.e-hentai.org/*
 // @grant        none
 // @license      MIT
+// @run-at       document-start
 // ==/UserScript==
 
 (function () {
@@ -42,6 +43,71 @@
   let currentMode;
   let systemListenerAttached = false;
   let darkToggleBtn;
+  let toTopBtn;
+  let toBottomBtn;
+  let pendingInlineBodyUpdate = null;
+  let pendingInlineBodyRaf = 0;
+
+  const setImportantStyle = (el, prop, value) => {
+    if (!el) return;
+    if (value === null) {
+      el.style.removeProperty(prop);
+    } else {
+      el.style.setProperty(prop, value, 'important');
+    }
+  };
+
+  const applyInlineBodyTheme = (isDark) => {
+    const body = document.body;
+    if (!body) return false;
+    if (isDark) {
+      setImportantStyle(body, 'background-color', DARK_BG);
+      setImportantStyle(body, 'background', DARK_BG);
+      setImportantStyle(body, 'color', DARK_TEXT);
+    } else {
+      setImportantStyle(body, 'background-color', null);
+      setImportantStyle(body, 'background', null);
+      setImportantStyle(body, 'color', null);
+    }
+    return true;
+  };
+
+  const flushPendingInlineBodyUpdate = () => {
+    pendingInlineBodyRaf = 0;
+    if (pendingInlineBodyUpdate === null) return;
+    if (applyInlineBodyTheme(pendingInlineBodyUpdate)) {
+      pendingInlineBodyUpdate = null;
+    } else {
+      scheduleInlineBodyUpdate();
+    }
+  };
+
+  const scheduleInlineBodyUpdate = () => {
+    if (pendingInlineBodyRaf) return;
+    pendingInlineBodyRaf = requestAnimationFrame(flushPendingInlineBodyUpdate);
+  };
+
+  const updateInlineTheme = (isDark) => {
+    const root = document.documentElement;
+    if (isDark) {
+      setImportantStyle(root, 'background-color', DARK_BG);
+      setImportantStyle(root, 'background', DARK_BG);
+      setImportantStyle(root, 'color', DARK_TEXT);
+      setImportantStyle(root, 'color-scheme', 'dark');
+    } else {
+      setImportantStyle(root, 'background-color', null);
+      setImportantStyle(root, 'background', null);
+      setImportantStyle(root, 'color', null);
+      setImportantStyle(root, 'color-scheme', null);
+    }
+
+    if (applyInlineBodyTheme(isDark)) {
+      pendingInlineBodyUpdate = null;
+    } else {
+      pendingInlineBodyUpdate = isDark;
+      scheduleInlineBodyUpdate();
+    }
+  };
 
   const readCookie = (k) =>
     document.cookie.split('; ').find(s => s.startsWith(k + '='))?.split('=')[1];
@@ -52,7 +118,11 @@
     document.cookie = `${k}=${v}; expires=${d.toUTCString()}; path=/` + (domain ? `; domain=${domain}` : '');
   };
 
-  const applyDark = (on) => document.documentElement.classList.toggle('eh-dark', !!on);
+  const applyDark = (on) => {
+    const isDark = !!on;
+    document.documentElement.classList.toggle('eh-dark', isDark);
+    updateInlineTheme(isDark);
+  };
 
   const setPref = (on) => {
     localStorage.setItem(LS_KEY, on ? '1' : '0');
@@ -146,10 +216,24 @@
     return MODE_AUTO;
   };
 
-  const initDarkPref = () => {
-    const initialMode = readInitialMode();
-    applyMode(initialMode, { persist: true });
+  const initDarkPref = (initialMode) => {
+    const modeToApply = initialMode ?? readInitialMode();
+    applyMode(modeToApply, { persist: true });
   };
+
+  const preApplyInitialMode = () => {
+    const mode = readInitialMode();
+    currentMode = mode;
+    const effective = resolveEffectiveMode(mode);
+    applyDark(effective === MODE_DARK);
+    return mode;
+  };
+
+  const preAppliedMode = preApplyInitialMode();
+
+  if (pendingInlineBodyUpdate !== null) {
+    flushPendingInlineBodyUpdate();
+  }
 
   /* =========================
    *         样式
@@ -376,7 +460,7 @@
 
   const style = document.createElement('style');
   style.textContent = styles;
-  document.head.appendChild(style);
+  (document.head || document.documentElement).appendChild(style);
 
   /* =========================
    *   悬浮：顶 / 底 / 暗色开关
@@ -389,21 +473,14 @@
     document.body.appendChild(el);
     return el;
   };
-  const toTopBtn = makeBtn('eh-to-top-btn', '▲', '回到顶部');
-  const toBottomBtn = makeBtn('eh-to-bottom-btn', '▼', '直达底部');
-  darkToggleBtn = makeBtn('eh-dark-toggle-btn', '🌓', '主题模式：系统/暗色/亮色（快捷键：d）', {display:'flex'});
-
-  toTopBtn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
-  toBottomBtn.addEventListener('click', () => window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'smooth' }));
-
   const onScroll = () => {
+    if (!toTopBtn || !toBottomBtn) return;
     const h = document.documentElement.scrollHeight;
     const ch = document.documentElement.clientHeight;
     const t = window.scrollY || document.documentElement.scrollTop;
     toTopBtn.style.display = t > 200 ? 'flex' : 'none';
     toBottomBtn.style.display = (t + ch >= h - 5) ? 'none' : 'flex';
   };
-  window.addEventListener('scroll', onScroll, { passive: true });
 
   /* =========================
    *     暗色开关（仅小写 d）
@@ -415,9 +492,36 @@
     fixMonsterBox();
     fixFavoritesUI();
   };
-  darkToggleBtn.addEventListener('click', cycleMode);
-  initDarkPref();
-  onScroll();
+
+  let bootstrapped = false;
+  const bootstrap = () => {
+    if (bootstrapped) return;
+    if (!document.body) {
+      if (document.readyState === 'loading') return;
+      requestAnimationFrame(bootstrap);
+      return;
+    }
+
+    bootstrapped = true;
+    toTopBtn = makeBtn('eh-to-top-btn', '▲', '回到顶部');
+    toBottomBtn = makeBtn('eh-to-bottom-btn', '▼', '直达底部');
+    darkToggleBtn = makeBtn('eh-dark-toggle-btn', '🌓', '主题模式：系统/暗色/亮色（快捷键：d）', {display:'flex'});
+
+    toTopBtn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+    toBottomBtn.addEventListener('click', () => window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'smooth' }));
+    darkToggleBtn.addEventListener('click', cycleMode);
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+
+    initDarkPref(preAppliedMode);
+    onScroll();
+  };
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', bootstrap);
+  } else {
+    bootstrap();
+  }
 
   /* =========================
    *   Monster Encounter 适配
