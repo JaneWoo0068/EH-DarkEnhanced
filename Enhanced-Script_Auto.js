@@ -13,6 +13,7 @@
 // @match        *://upload.e-hentai.org/*
 // @grant        none
 // @license      MIT
+// @run-at       document-start
 // ==/UserScript==
 
 (function () {
@@ -42,6 +43,8 @@
   let currentMode;
   let systemListenerAttached = false;
   let darkToggleBtn;
+  let toTopBtn;
+  let toBottomBtn;
 
   const readCookie = (k) =>
     document.cookie.split('; ').find(s => s.startsWith(k + '='))?.split('=')[1];
@@ -146,10 +149,20 @@
     return MODE_AUTO;
   };
 
-  const initDarkPref = () => {
-    const initialMode = readInitialMode();
-    applyMode(initialMode, { persist: true });
+  const initDarkPref = (initialMode) => {
+    const modeToApply = initialMode ?? readInitialMode();
+    applyMode(modeToApply, { persist: true });
   };
+
+  const preApplyInitialMode = () => {
+    const mode = readInitialMode();
+    currentMode = mode;
+    const effective = resolveEffectiveMode(mode);
+    applyDark(effective === MODE_DARK);
+    return mode;
+  };
+
+  const preAppliedMode = preApplyInitialMode();
 
   /* =========================
    *         样式
@@ -376,7 +389,7 @@
 
   const style = document.createElement('style');
   style.textContent = styles;
-  document.head.appendChild(style);
+  (document.head || document.documentElement).appendChild(style);
 
   /* =========================
    *   悬浮：顶 / 底 / 暗色开关
@@ -389,21 +402,14 @@
     document.body.appendChild(el);
     return el;
   };
-  const toTopBtn = makeBtn('eh-to-top-btn', '▲', '回到顶部');
-  const toBottomBtn = makeBtn('eh-to-bottom-btn', '▼', '直达底部');
-  darkToggleBtn = makeBtn('eh-dark-toggle-btn', '🌓', '主题模式：系统/暗色/亮色（快捷键：d）', {display:'flex'});
-
-  toTopBtn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
-  toBottomBtn.addEventListener('click', () => window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'smooth' }));
-
   const onScroll = () => {
+    if (!toTopBtn || !toBottomBtn) return;
     const h = document.documentElement.scrollHeight;
     const ch = document.documentElement.clientHeight;
     const t = window.scrollY || document.documentElement.scrollTop;
     toTopBtn.style.display = t > 200 ? 'flex' : 'none';
     toBottomBtn.style.display = (t + ch >= h - 5) ? 'none' : 'flex';
   };
-  window.addEventListener('scroll', onScroll, { passive: true });
 
   /* =========================
    *     暗色开关（仅小写 d）
@@ -415,9 +421,36 @@
     fixMonsterBox();
     fixFavoritesUI();
   };
-  darkToggleBtn.addEventListener('click', cycleMode);
-  initDarkPref();
-  onScroll();
+
+  let bootstrapped = false;
+  const bootstrap = () => {
+    if (bootstrapped) return;
+    if (!document.body) {
+      if (document.readyState === 'loading') return;
+      requestAnimationFrame(bootstrap);
+      return;
+    }
+
+    bootstrapped = true;
+    toTopBtn = makeBtn('eh-to-top-btn', '▲', '回到顶部');
+    toBottomBtn = makeBtn('eh-to-bottom-btn', '▼', '直达底部');
+    darkToggleBtn = makeBtn('eh-dark-toggle-btn', '🌓', '主题模式：系统/暗色/亮色（快捷键：d）', {display:'flex'});
+
+    toTopBtn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+    toBottomBtn.addEventListener('click', () => window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'smooth' }));
+    darkToggleBtn.addEventListener('click', cycleMode);
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+
+    initDarkPref(preAppliedMode);
+    onScroll();
+  };
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', bootstrap);
+  } else {
+    bootstrap();
+  }
 
   /* =========================
    *   Monster Encounter 适配
