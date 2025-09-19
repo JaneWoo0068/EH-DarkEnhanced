@@ -488,15 +488,135 @@
     !!el && (['INPUT','TEXTAREA','SELECT'].includes(el.tagName) || el.isContentEditable);
 
   const triggerArrow = (key) => {
-    const ev = new KeyboardEvent('keydown', {
+    const keyCode = key === 'ArrowLeft' ? 37 : 39;
+    const init = {
       key,
       code: key,
-      keyCode: key === 'ArrowLeft' ? 37 : 39,
-      which:   key === 'ArrowLeft' ? 37 : 39,
-      bubbles:true, cancelable:true
-    });
-    document.dispatchEvent(ev); window.dispatchEvent(ev);
+      keyCode,
+      which: keyCode,
+      bubbles: true,
+      cancelable: true
+    };
+    const down = new KeyboardEvent('keydown', init);
+    document.dispatchEvent(down);
+    window.dispatchEvent(down);
+    const up = new KeyboardEvent('keyup', init);
+    document.dispatchEvent(up);
+    window.dispatchEvent(up);
   };
+
+  const KEY_HANDLER_FLAG = '__ehDarkHandled';
+
+  const NEXT_STRICT_TEXT = /(下一页|下一頁|下一|下页|下頁|后页|後頁|\bnext\b|\bnext\s+page\b|\bforward\b)/i;
+  const PREV_STRICT_TEXT = /(上一页|上一頁|上一|上页|上頁|前页|前頁|\bprev\b|\bprevious\b|\bprev\s+page\b|\bback\b)/i;
+  const NEXT_LOOSE_TEXT = /(下一|下页|下頁|后页|後頁|next|forward|之后|往后|往右|下一个|下一部|下一章|右|下)/i;
+  const PREV_LOOSE_TEXT = /(上一|上页|上頁|前页|前頁|prev|previous|back|返回|往前|往左|上一个|上一部|上一章|左|上)/i;
+  const NEXT_EDGE_REGEX = /(>\s*$|^\s*>|＞\s*$|^\s*＞)/;
+  const PREV_EDGE_REGEX = /(<\s*$|^\s*<|＜\s*$|^\s*＜)/;
+  const NEXT_SYMBOL_REGEX = /^(?:[>»›≫→▶⯈⯊➔➜➤➡⮕⮞⮡⮥⯈»]+)$/;
+  const PREV_SYMBOL_REGEX = /^(?:[<«‹≪←◀⯇⯉⬅⮜⮝⮠⮡⯇«]+)$/;
+
+  const NEXT_ATTR_STRICT_HINTS = ['next'];
+  const PREV_ATTR_STRICT_HINTS = ['prev'];
+  const NEXT_ATTR_LOOSE_HINTS = ['next', 'forward', 'right', 'after', '下一', '下页', '下頁', '后页', '後頁', '下一个', '下一個'];
+  const PREV_ATTR_LOOSE_HINTS = ['prev', 'previous', 'back', 'left', '上一', '上页', '上頁', '前页', '前頁', '上一個', '上一部'];
+
+  const collectNavTokens = (el) => {
+    const tokens = new Set();
+    const add = (val) => {
+      if (!val || typeof val !== 'string') return;
+      const lower = val.toLowerCase();
+      if (!lower) return;
+      tokens.add(lower);
+      lower.split(/[\s>/<_-]+/).forEach((part) => {
+        if (part && part !== lower) tokens.add(part);
+      });
+    };
+    let node = el;
+    let depth = 0;
+    while (node && node.nodeType === 1 && depth < 3) {
+      add(node.id);
+      const className = node.className;
+      if (typeof className === 'string') add(className);
+      else if (className && typeof className.baseVal === 'string') add(className.baseVal);
+      add(node.getAttribute?.('rel'));
+      add(node.getAttribute?.('aria-label'));
+      add(node.getAttribute?.('title'));
+      add(node.getAttribute?.('name'));
+      add(node.getAttribute?.('role'));
+      add(node.getAttribute?.('data-action'));
+      add(node.getAttribute?.('data-nav'));
+      add(node.getAttribute?.('data-eh-nav'));
+      add(node.getAttribute?.('data-direction'));
+      add(node.getAttribute?.('data-key'));
+      add(node.getAttribute?.('accesskey'));
+      if (node.tagName === 'A' || node.tagName === 'AREA') add(node.getAttribute?.('href'));
+      if (node.tagName === 'BUTTON' || node.tagName === 'INPUT') add(node.getAttribute?.('value'));
+      depth += 1;
+      node = node.parentElement;
+    }
+    return Array.from(tokens);
+  };
+
+  const hasAttrHint = (el, wantNext, strict) => {
+    const tokens = collectNavTokens(el);
+    if (!tokens.length) return false;
+    const hints = wantNext
+      ? (strict ? NEXT_ATTR_STRICT_HINTS : NEXT_ATTR_LOOSE_HINTS)
+      : (strict ? PREV_ATTR_STRICT_HINTS : PREV_ATTR_LOOSE_HINTS);
+    return tokens.some((token) => {
+      if (!wantNext && (token.startsWith('previe') || token.startsWith('prevent'))) return false;
+      return hints.some((hint) => token.includes(hint));
+    });
+  };
+
+  const matchesNavText = (text, wantNext, strict) => {
+    if (!text || typeof text !== 'string') return false;
+    const trimmed = text.trim();
+    if (!trimmed) return false;
+    if (strict) return (wantNext ? NEXT_STRICT_TEXT : PREV_STRICT_TEXT).test(trimmed);
+    if ((wantNext ? NEXT_STRICT_TEXT : PREV_STRICT_TEXT).test(trimmed)) return true;
+    if ((wantNext ? NEXT_LOOSE_TEXT : PREV_LOOSE_TEXT).test(trimmed)) return true;
+    if ((wantNext ? NEXT_EDGE_REGEX : PREV_EDGE_REGEX).test(trimmed)) return true;
+    const condensed = trimmed.replace(/\s+/g, '');
+    if ((wantNext ? NEXT_SYMBOL_REGEX : PREV_SYMBOL_REGEX).test(condensed)) return true;
+    return false;
+  };
+
+  const elementMatchesDirection = (el, wantNext, strict) => {
+    if (!el) return false;
+    if (matchesNavText(el.textContent || '', wantNext, strict)) return true;
+    const aria = el.getAttribute?.('aria-label');
+    if (matchesNavText(aria || '', wantNext, strict)) return true;
+    const title = el.getAttribute?.('title');
+    if (matchesNavText(title || '', wantNext, strict)) return true;
+    if (hasAttrHint(el, wantNext, strict)) return true;
+    return false;
+  };
+
+  const uniqueElements = (elements) => {
+    const seen = new Set();
+    const result = [];
+    for (const el of elements) {
+      if (!el || seen.has(el)) continue;
+      seen.add(el);
+      result.push(el);
+    }
+    return result;
+  };
+
+  const gatherClickableDescendants = (root) =>
+    Array.from(
+      root.querySelectorAll?.(
+        'a[href], area[href], button, input[type="button"], input[type="submit"], [onclick], [role="button"]'
+      ) || []
+    );
+
+  const elementIsClickable = (el) =>
+    !!el &&
+    (el.matches?.('a[href], area[href], button, input[type="button"], input[type="submit"]') ||
+      !!el.getAttribute?.('onclick') ||
+      el.getAttribute?.('role') === 'button');
 
   const followNavElement = (el) => {
     if (!el) return false;
@@ -532,67 +652,131 @@
     return false;
   };
 
-  const gotoPrevNextPage = (isNext) => {
-    const pagers = Array.from(document.querySelectorAll('table.ptt, table.ptb, .searchnav, #dprev, #dnext, .dprev, .dnext'));
-
+  const gotoPrevNextPage = (isNext, { imageMode = false } = {}) => {
     const wantNext = isNext;
-    const nextRegex = /(next|>>|»|>)/i;
-    const prevRegex = /(prev|<<|«|<)/i;
+    const baseSelectors = [
+      'table.ptt',
+      'table.ptb',
+      '.searchnav',
+      '#dprev',
+      '#dnext',
+      '.dprev',
+      '.dnext',
+      '#prev',
+      '#next',
+      '#aprev',
+      '#anext',
+      'a[accesskey="a"]',
+      'a[accesskey="d"]',
+      '[class~="prev"]',
+      '[class~="next"]'
+    ];
+    if (imageMode) baseSelectors.push('#i3 > a[href]');
+    const pagers = uniqueElements(
+      baseSelectors.flatMap((sel) => Array.from(document.querySelectorAll(sel)))
+    );
+
+    const tried = new Set();
+    const tryFollow = (candidates) => {
+      for (const el of candidates) {
+        if (!el || tried.has(el)) continue;
+        tried.add(el);
+        if (followNavElement(el)) return true;
+      }
+      return false;
+    };
 
     for (const pager of pagers) {
       const links = [];
-      if (pager.matches?.('a[href], span[id^="u"], td[onclick*="document.location"]')) links.push(pager);
-      links.push(...pager.querySelectorAll?.('a[href], span[id^="u"], td[onclick*="document.location"]') || []);
+      if (elementIsClickable(pager)) links.push(pager);
+      links.push(...gatherClickableDescendants(pager));
       if (!links.length) continue;
 
-      const primary = links.find(a => (wantNext ? /next/i.test(a.textContent) : /prev/i.test(a.textContent)));
-      if (primary) {
-        if (followNavElement(primary)) return true;
-      }
+      const strongMatches = links.filter((el) => elementMatchesDirection(el, wantNext, true));
+      if (strongMatches.length && tryFollow(strongMatches)) return true;
 
-      // 兼容 favorites 上方的 span#uprev/#unext（需要触发它的 href）
-      if (!primary) {
-        const alt = pager.querySelector(wantNext ? '#unext' : '#uprev');
-        if (alt && alt.getAttribute('href')) { location.href = alt.getAttribute('href'); return true; }
-      }
+      const alt = pager.querySelector?.(wantNext ? '#unext' : '#uprev');
+      if (alt && tryFollow([alt])) return true;
 
-      const fallback = links.find(a => (wantNext ? nextRegex.test(a.textContent) : prevRegex.test(a.textContent)));
-      if (fallback) {
-        if (followNavElement(fallback)) return true;
-      }
+      const looseMatches = links.filter((el) => elementMatchesDirection(el, wantNext, false));
+      if (looseMatches.length && tryFollow(looseMatches)) return true;
     }
 
-    // Direct fallbacks for dprev/dnext outside of the pagers list
-    const direct = document.querySelector(isNext ? '#dnext a[href], #dnext' : '#dprev a[href], #dprev');
-    if (direct && followNavElement(direct)) return true;
+    const candidateSet = new Set();
+    const candidateSelectors = [
+      'a[href]',
+      'area[href]',
+      '[onclick]',
+      '[data-action]',
+      '[data-nav]',
+      '[data-eh-nav]',
+      '[aria-label]',
+      '[title]',
+      '[role="button"]',
+      '[id*="prev" i]',
+      '[id*="next" i]',
+      '[class*="prev" i]',
+      '[class*="next" i]'
+    ];
+    candidateSelectors.forEach((sel) => {
+      document.querySelectorAll(sel).forEach((el) => candidateSet.add(el));
+    });
+
+    const allCandidates = uniqueElements(Array.from(candidateSet));
+
+    const attrMatches = allCandidates.filter((el) => elementMatchesDirection(el, wantNext, true));
+    if (attrMatches.length && tryFollow(attrMatches)) return true;
+
+    const textMatches = allCandidates.filter((el) => elementMatchesDirection(el, wantNext, false));
+    if (textMatches.length && tryFollow(textMatches)) return true;
+
+    if (imageMode && wantNext) {
+      const imageLink = document.querySelector('#i3 > a[href]');
+      if (imageLink && tryFollow([imageLink])) return true;
+    }
+
     return false;
   };
 
-  window.addEventListener('keydown', (e) => {
-    if (isTyping(document.activeElement) || e.defaultPrevented) return;
+  const handleKeydown = (e) => {
+    if (e[KEY_HANDLER_FLAG]) return;
+    e[KEY_HANDLER_FLAG] = true;
 
-    // 仅小写 d，且不带修饰键
-    if (e.key === 'd' && !e.ctrlKey && !e.metaKey && !e.altKey && !e.shiftKey) {
+    if (isTyping(document.activeElement)) return;
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
+
+    const keyLower = (e.key || '').toLowerCase();
+
+    if (!e.shiftKey && keyLower === 'd') {
       e.preventDefault();
       cycleMode();
       return;
     }
 
-    // [ 与 ]：兼容 e.code
-    const isBracketLeft  = (e.key === '[') || (e.code === 'BracketLeft');
-    const isBracketRight = (e.key === ']') || (e.code === 'BracketRight');
+    const isBracketLeft = e.key === '[' || e.code === 'BracketLeft';
+    const isBracketRight = e.key === ']' || e.code === 'BracketRight';
 
-    if ((isBracketLeft || isBracketRight) && !e.ctrlKey && !e.metaKey && !e.altKey && !e.shiftKey) {
+    if ((isBracketLeft || isBracketRight) && !e.shiftKey) {
       e.preventDefault();
-      const isImageView = /\/s\//.test(location.pathname) || /\/mpv\//.test(location.pathname);
-      if (isImageView) {
-        if (isBracketLeft) triggerArrow('ArrowLeft'); else triggerArrow('ArrowRight');
-      } else {
-        const ok = gotoPrevNextPage(isBracketRight);
-        if (!ok) triggerArrow(isBracketRight ? 'ArrowRight' : 'ArrowLeft');
-      }
+      const isNext = isBracketRight;
+      const imageMode = /\/s\//.test(location.pathname) || /\/mpv\//.test(location.pathname);
+      const ok = gotoPrevNextPage(isNext, { imageMode });
+      if (!ok) triggerArrow(isNext ? 'ArrowRight' : 'ArrowLeft');
     }
-  }, { passive:false });
+  };
+
+  const addKeyListener = (target, options) => {
+    try {
+      target.addEventListener('keydown', handleKeydown, options);
+    } catch (err) {
+      const useCapture = !!(options && typeof options === 'object' && options.capture);
+      target.addEventListener('keydown', handleKeydown, useCapture);
+    }
+  };
+
+  addKeyListener(window, { capture: true, passive: false });
+  addKeyListener(window, { passive: false });
+  addKeyListener(document, { capture: true, passive: false });
 
 })();
 
