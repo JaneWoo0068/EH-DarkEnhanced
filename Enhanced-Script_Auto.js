@@ -2,7 +2,7 @@
 // @name         E-Hentai 实用增强：回顶/到底 + [ ] 翻页 + 自动主题切换
 // @name:en      E-Hentai Tweaks: Scroll Buttons + [ ] Paging + Auto Theme Switching
 // @namespace    https://greasyfork.org/users/1508871-vesper233
-// @version      4.3
+// @version      4.5
 // @description  悬浮回顶/到底；全站 [ 与 ] 快捷翻页；自动主题切换
 // @description:en   Scroll to Top/Bottom buttons; [ and ] for Prev/Next page; Auto Theme Switching
 // @author       Vesper233
@@ -406,16 +406,16 @@
   window.addEventListener('scroll', onScroll, { passive: true });
 
   /* =========================
-   *     暗色开关（仅小写 d）
+   *     暗色开关（快捷键 d）
    * ========================= */
-  const cycleMode = () => {
+  const cycleMode = (direction = 1) => {
+    const step = typeof direction === 'number' ? direction : 1;
     const idx = MODE_SEQUENCE.indexOf(currentMode);
-    const nextMode = MODE_SEQUENCE[(idx + 1) % MODE_SEQUENCE.length];
+    const base = idx === -1 ? 0 : idx;
+    const nextMode = MODE_SEQUENCE[(base + step + MODE_SEQUENCE.length) % MODE_SEQUENCE.length];
     applyMode(nextMode);
-    fixMonsterBox();
-    fixFavoritesUI();
   };
-  darkToggleBtn.addEventListener('click', cycleMode);
+  darkToggleBtn.addEventListener('click', () => cycleMode());
   initDarkPref();
   onScroll();
 
@@ -503,7 +503,12 @@
 
     // If the element itself is a link-like node, try to act on it directly.
     if (el.matches?.('td[onclick*="document.location"]')) {
-      el.click();
+      const anchor = el.querySelector?.('a[href]');
+      if (anchor?.href) {
+        location.href = anchor.href;
+      } else if (typeof el.click === 'function') {
+        el.click();
+      }
       return true;
     }
 
@@ -533,7 +538,21 @@
   };
 
   const gotoPrevNextPage = (isNext) => {
-    const pagers = Array.from(document.querySelectorAll('table.ptt, table.ptb, .searchnav, #dprev, #dnext, .dprev, .dnext'));
+    const followFirst = (selectors) => {
+      for (const selector of selectors) {
+        const candidate = document.querySelector(selector);
+        if (candidate && followNavElement(candidate)) return true;
+      }
+      return false;
+    };
+
+    const directSelectors = isNext
+      ? ['#dnext', '.searchnav #dnext', '.searchnav .dnext', '.dnext']
+      : ['#dprev', '.searchnav #dprev', '.searchnav .dprev', '.dprev'];
+
+    if (followFirst(directSelectors)) return true;
+
+    const pagers = Array.from(document.querySelectorAll('table.ptt, table.ptb, .searchnav, #dprev, #dnext, .dprev, .dnext, td.ptdd'));
 
     const wantNext = isNext;
     const nextRegex = /(next|>>|»|>)/i;
@@ -568,11 +587,18 @@
     return false;
   };
 
-  window.addEventListener('keydown', (e) => {
-    if (isTyping(document.activeElement) || e.defaultPrevented) return;
+  const KEYDOWN_MARK = '__ehKeyHandled';
+  const keyListenerOptions = { capture:true, passive:false };
 
-    // 仅小写 d，且不带修饰键
-    if (e.key === 'd' && !e.ctrlKey && !e.metaKey && !e.altKey && !e.shiftKey) {
+  const onKeyDown = (e) => {
+    if (e[KEYDOWN_MARK]) return;
+    e[KEYDOWN_MARK] = true;
+
+    if (isTyping(document.activeElement)) return;
+
+    // d 键：在 系统 / 暗色 / 亮色 之间循环
+    const keyLower = typeof e.key === 'string' ? e.key.toLowerCase() : '';
+    if (keyLower === 'd' && !e.ctrlKey && !e.metaKey && !e.altKey && !e.shiftKey) {
       e.preventDefault();
       cycleMode();
       return;
@@ -592,7 +618,9 @@
         if (!ok) triggerArrow(isBracketRight ? 'ArrowRight' : 'ArrowLeft');
       }
     }
-  }, { passive:false });
+  };
+
+  window.addEventListener('keydown', onKeyDown, keyListenerOptions);
+  document.addEventListener('keydown', onKeyDown, keyListenerOptions);
 
 })();
-
