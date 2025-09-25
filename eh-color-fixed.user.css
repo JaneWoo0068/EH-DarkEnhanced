@@ -1,0 +1,1009 @@
+/* ==UserStyle==
+@name         E-Hentai 暗色主题 (防闪烁版)
+@name:en      E-Hentai Dark Theme (Anti-Flash)
+@namespace    https://greasyfork.org/users/1508871-vesper233
+@description  E-Hentai 暗色主题，支持三种模式且防止闪烁
+@description:en E-Hentai dark theme with three modes and anti-flash
+@version      5.2.0
+@author       Vesper233
+@license      MIT
+@preprocessor stylus
+==/UserStyle== */
+
+@-moz-document domain("e-hentai.org") {
+
+/* =========================
+ *   ExHentai 颜色变量
+ * ========================= */
+:root {
+  /* ExHentai 真实颜色 */
+  --exh-bg-primary: #34353b;      /* 主背景 */
+  --exh-bg-secondary: #4f535b;    /* 内容框背景 */
+  --exh-bg-tertiary: #40454b;     /* 表头背景 */
+  --exh-bg-row-odd: #363940;      /* 奇数行 */
+  --exh-bg-row-even: #3c414b;     /* 偶数行 */
+  --exh-bg-hover: #43464e;        /* 悬停背景 */
+  --exh-bg-input: #34353b;        /* 输入框背景 */
+  
+  /* ExHentai 文字颜色 */
+  --exh-text-primary: #f1f1f1;    /* 主要文字 */
+  --exh-text-secondary: #dddddd;   /* 链接文字 */
+  --exh-text-muted: #aaaaaa;      /* 导航栏文字 */
+  --exh-text-disabled: #8a8a8a;   /* 禁用文字 */
+  --exh-text-visited: #bbbbbb;    /* 已访问链接 */
+  --exh-text-hover: #eeeeee;      /* 悬停文字 */
+  
+  /* ExHentai 边框颜色 */
+  --exh-border-primary: #3c3c3c;  /* 主要边框 */
+  --exh-border-secondary: #000000; /* 深色边框 */
+  --exh-border-table: #2a2a2a;    /* 表格边框 */
+  --exh-border-input: #8d8d8d;    /* 输入框边框 */
+  
+  /* E-Hentai 原版颜色 (用于亮色模式覆盖) */
+  --eh-bg-primary: #E3E0D1;       /* 原版主背景 */
+  --eh-bg-secondary: #EDEBDF;     /* 原版内容框背景 */
+  --eh-bg-tertiary: #E0DED3;      /* 原版表头背景 */
+  --eh-bg-row-odd: #F2F0E4;       /* 原版奇数行 */
+  --eh-bg-row-even: #EDEBDF;      /* 原版偶数行 */
+  --eh-bg-hover: #F2EFDF;         /* 原版悬停背景 */
+  --eh-bg-input: #EDEADA;         /* 原版输入框背景 */
+  
+  --eh-text-primary: #5C0D11;     /* 原版主要文字 */
+  --eh-text-secondary: #5C0D11;   /* 原版链接文字 */
+  --eh-text-muted: #AAAAAA;       /* 原版导航栏文字 */
+  --eh-text-disabled: #C2A8A4;    /* 原版禁用文字 */
+  --eh-text-visited: #8F6063;     /* 原版已访问链接 */
+  --eh-text-hover: #8F4701;       /* 原版悬停文字 */
+  
+  --eh-border-primary: #5C0D12;   /* 原版主要边框 */
+  --eh-border-secondary: #5C0D12; /* 原版深色边框 */
+  --eh-border-table: #D9D7CC;     /* 原版表格边框 */
+  --eh-border-input: #B5A4A4;     /* 原版输入框边框 */
+}
+
+/* =========================
+ *   默认应用暗色主题 (防闪烁策略)
+ *   页面加载时立即生效，无需等待 JS
+ * ========================= */
+
+/* 基础页面颜色 - 默认暗色 */
+html {
+  background: var(--exh-bg-primary) !important;
+  color: var(--exh-text-primary) !important;
+}
+
+body {
+  background: var(--exh-bg-primary) !important;
+  color: var(--exh-text-primary) !important;
+}
+
+/* 链接颜色 - 默认暗色 */
+a {
+  color: var(--exh-text-secondary) !important;
+}
+
+a:hover {
+  color: var(--exh-text-hover) !important;
+}
+
+a:visited .glink,
+a:active .glink {
+  color: var(--exh-text-visited) !important;
+}
+
+a:hover .glink {
+  color: var(--exh-text-hover) !important;
+}
+
+.glname a :not(.glink),
+a .glname :not(.glink) {
+  color: var(--exh-text-secondary) !important;
+}
+
+/* 分隔线颜色 */
+hr {
+  background: var(--exh-text-primary) !important;
+}
+
+/* 输入框和表单元素 - 默认暗色 */
+input, select, option, optgroup, textarea {
+  color: var(--exh-text-primary) !important;
+  background-color: var(--exh-bg-input) !important;
+}
+
+input[type="button"], input[type="submit"] {
+  border-color: var(--exh-border-input) !important;
+}
+
+select {
+  border-color: var(--exh-border-input) !important;
+}
+
+input[type="button"]:enabled:hover,
+input[type="submit"]:enabled:hover,
+select:enabled:hover,
+input[type="button"]:enabled:focus,
+input[type="submit"]:enabled:focus,
+select:enabled:focus {
+  background-color: var(--exh-bg-hover) !important;
+  border-color: #aeaeae !important;
+}
+
+input[type="text"], input[type="date"], input[type="password"], textarea {
+  border-color: var(--exh-border-input) !important;
+}
+
+input:disabled, select:disabled, textarea:disabled {
+  color: var(--exh-text-disabled) !important;
+  -webkit-text-fill-color: var(--exh-text-disabled) !important;
+}
+
+input::placeholder, textarea::placeholder {
+  color: var(--exh-text-disabled) !important;
+  -webkit-text-fill-color: var(--exh-text-disabled) !important;
+}
+
+input[type="text"]:enabled:hover,
+input[type="date"]:enabled:hover,
+input[type="password"]:enabled:hover,
+textarea:enabled:hover,
+input[type="text"]:enabled:focus,
+input[type="date"]:enabled:focus,
+input[type="password"]:enabled:focus,
+textarea:enabled:focus {
+  background-color: var(--exh-bg-hover) !important;
+}
+
+/* 内容框 - 默认暗色 */
+.stuffbox {
+  background: var(--exh-bg-secondary) !important;
+  border-color: var(--exh-border-secondary) !important;
+}
+
+.ido {
+  background: var(--exh-bg-secondary) !important;
+  border-color: var(--exh-border-secondary) !important;
+}
+
+/* 导航栏 - 默认暗色 */
+#nb {
+  color: var(--exh-text-muted) !important;
+}
+
+#nb a {
+  color: var(--exh-text-secondary) !important;
+}
+
+/* 表格 - 默认暗色 */
+div.itg {
+  border-top-color: var(--exh-border-primary) !important;
+  border-bottom-color: var(--exh-border-primary) !important;
+}
+
+table.itg {
+  border-color: var(--exh-border-primary) !important;
+}
+
+table.itg > tbody > tr > th {
+  background: var(--exh-bg-tertiary) !important;
+  color: var(--exh-text-primary) !important;
+}
+
+table.itg > tbody > tr:nth-child(2n+1),
+table.itg > tbody > tr:nth-child(2n+1) .glthumb,
+table.itg > tbody > tr:nth-child(2n+1) .glcut {
+  background: var(--exh-bg-row-odd) !important;
+}
+
+table.itg > tbody > tr:nth-child(2n+2),
+table.itg > tbody > tr:nth-child(2n+2) .glthumb,
+table.itg > tbody > tr:nth-child(2n+2) .glcut {
+  background: var(--exh-bg-row-even) !important;
+}
+
+.gl1t:nth-child(2n+1) {
+  background: var(--exh-bg-row-odd) !important;
+}
+
+.gl1t:nth-child(2n+2) {
+  background: var(--exh-bg-row-even) !important;
+}
+
+td.itd {
+  border-right-color: var(--exh-border-table) !important;
+}
+
+.gltc > tbody > tr > td,
+.glte > tbody > tr > td {
+  border-right-color: var(--exh-border-table) !important;
+}
+
+.gltm > tbody > tr > td {
+  border-right-color: var(--exh-border-table) !important;
+}
+
+.gl1c, .gl2c, .gl3c, .gl4c, .glfc {
+  border-top-color: var(--exh-border-table) !important;
+  border-bottom-color: var(--exh-border-table) !important;
+}
+
+.gl1e, .gl2e, .glfe {
+  border-top-color: var(--exh-border-table) !important;
+  border-bottom-color: var(--exh-border-table) !important;
+}
+
+.gld {
+  border-left-color: var(--exh-border-table) !important;
+}
+
+.gl1t {
+  border-right-color: var(--exh-border-table) !important;
+  border-bottom-color: var(--exh-border-table) !important;
+}
+
+.gl4e {
+  border-left-color: var(--exh-border-table) !important;
+}
+
+table.mt {
+  border-color: var(--exh-border-secondary) !important;
+  background: var(--exh-bg-tertiary) !important;
+}
+
+table.mt > tbody > tr:nth-child(2n+1) {
+  background: var(--exh-bg-row-odd) !important;
+}
+
+table.mt > tbody > tr:nth-child(2n+2) {
+  background: var(--exh-bg-row-even) !important;
+}
+
+tr.gtr,
+table.mt > tbody > tr:first-child {
+  background: var(--exh-bg-tertiary) !important;
+}
+
+/* 缩略图悬停效果 */
+.glthumb {
+  border-color: var(--exh-border-table) !important;
+}
+
+.glthumb > div:nth-child(1) {
+  border-color: var(--exh-border-secondary) !important;
+}
+
+.gl1e > div {
+  border-color: var(--exh-border-secondary) !important;
+}
+
+.gl3t {
+  border-color: var(--exh-border-secondary) !important;
+}
+
+/* 登录框 */
+div.d {
+  border-color: var(--exh-border-secondary) !important;
+  background: var(--exh-bg-secondary) !important;
+}
+
+div.ds {
+  border-color: var(--exh-border-secondary) !important;
+  background: var(--exh-bg-secondary) !important;
+}
+
+/* 索引页面 */
+div.idi {
+  border-color: var(--exh-border-primary) !important;
+}
+
+/* 分页导航 */
+table.ptt, table.ptb {
+  color: var(--exh-text-primary) !important;
+}
+
+table.ptt td, table.ptb td {
+  background: var(--exh-bg-primary) !important;
+  border-color: var(--exh-border-secondary) !important;
+}
+
+table.ptt td:hover, table.ptb td:hover {
+  color: #000000 !important;
+  background: var(--exh-bg-hover) !important;
+}
+
+table.ptt span, table.ptb span {
+  color: var(--exh-text-disabled) !important;
+}
+
+td.ptds {
+  color: #000000 !important;
+  background: var(--exh-bg-hover) !important;
+}
+
+td.ptdd {
+  color: var(--exh-text-disabled) !important;
+}
+
+td.ptdd:hover {
+  color: var(--exh-text-disabled) !important;
+  background: var(--exh-bg-primary) !important;
+}
+
+/* 画廊详情页 */
+.gm {
+  background: var(--exh-bg-secondary) !important;
+  border-color: var(--exh-border-secondary) !important;
+}
+
+#gmid {
+  background: var(--exh-bg-secondary) !important;
+}
+
+#gd2 {
+  background: var(--exh-bg-secondary) !important;
+}
+
+#gdt {
+  background: var(--exh-bg-secondary) !important;
+  border-color: var(--exh-border-secondary) !important;
+}
+
+#gds {
+  background: var(--exh-bg-secondary) !important;
+}
+
+/* 标签 */
+div.gt {
+  border-color: #989898 !important;
+  background: var(--exh-bg-secondary) !important;
+  color: var(--exh-text-primary) !important;
+}
+
+div.gtl {
+  border-color: #8c8c8c !important;
+  background: var(--exh-bg-secondary) !important;
+  color: var(--exh-text-primary) !important;
+}
+
+div.gtw {
+  border-color: #8c8c8c !important;
+  background: var(--exh-bg-secondary) !important;
+  color: var(--exh-text-primary) !important;
+}
+
+/* 评论区 */
+div.c2 {
+  background: var(--exh-bg-primary) !important;
+  border-color: var(--exh-bg-secondary) !important;
+}
+
+/* 图片页面 */
+div.sni {
+  background: var(--exh-bg-secondary) !important;
+  border-color: var(--exh-border-secondary) !important;
+}
+
+/* 搜索和导航 */
+.searchnav {
+  color: var(--exh-text-primary) !important;
+}
+
+.searchnav a {
+  color: var(--exh-text-secondary) !important;
+}
+
+.searchnav div > span {
+  color: #777 !important;
+}
+
+/* 范围栏 */
+#rangebar {
+  background: var(--exh-bg-tertiary) !important;
+}
+
+#rangebar div {
+  background: rgba(241, 241, 241, 0.24) !important;
+}
+
+#rangebar div[data-inrange] {
+  background: radial-gradient(rgba(241, 241, 241, 0.69), rgba(241, 241, 241, 0.59)) !important;
+}
+
+#rangebar a:hover > div {
+  background: var(--exh-text-primary) !important;
+}
+
+/* 其他元素 */
+.ip {
+  color: var(--exh-text-primary) !important;
+}
+
+.ip a {
+  color: var(--exh-text-secondary) !important;
+}
+
+/* 收藏夹页面专用样式 - 默认暗色 */
+/* 收藏夹分类按钮 - 匹配ExHentai真实样式 */
+div.fp,
+div.fp.eh-dark-favpill {
+  background: transparent !important;
+  border: 1px solid transparent !important;
+  color: var(--exh-text-primary) !important;
+}
+
+div.fp:hover,
+div.fp.eh-dark-favpill:hover {
+  background: #43464e !important;
+  border: 1px solid #C2C1C1 !important;
+}
+
+/* Show All Favorites 按钮 - 默认有背景色 */
+div.fp.fps,
+div.fp.fps.eh-dark-favpill {
+  background: #43464e !important;
+  border: 1px solid #C2C1C1 !important;
+  color: var(--exh-text-primary) !important;
+}
+
+div.fp.fps:hover,
+div.fp.fps.eh-dark-favpill:hover {
+  background: #43464e !important;
+  border: 1px solid #C2C1C1 !important;
+}
+
+/* 收藏夹操作选择框 */
+select#favsel {
+  background: var(--exh-bg-input) !important;
+  border: 1px solid var(--exh-border-input) !important;
+  color: var(--exh-text-primary) !important;
+}
+
+select#favsel:hover,
+select#favsel:focus {
+  background: var(--exh-bg-hover) !important;
+  border-color: var(--exh-border-input) !important;
+}
+
+/* 收藏夹操作区域 */
+div#favact {
+  background: var(--exh-bg-primary) !important;
+  color: var(--exh-text-primary) !important;
+}
+
+/* 搜索导航选择框 */
+.searchnav select {
+  background: var(--exh-bg-input) !important;
+  border: 1px solid var(--exh-border-input) !important;
+  color: var(--exh-text-primary) !important;
+}
+
+.searchnav select:hover,
+.searchnav select:focus {
+  background: var(--exh-bg-hover) !important;
+  border-color: var(--exh-border-input) !important;
+}
+
+/* 收藏夹页面的复选框 - 匹配ExHentai真实样式 */
+input[type="checkbox"] {
+  background: var(--exh-bg-input) !important;
+  border: 1px solid var(--exh-border-input) !important;
+  accent-color: var(--exh-text-secondary) !important;
+}
+
+/* 复选框标签容器 */
+label.lc {
+  color: var(--exh-text-primary) !important;
+}
+
+/* 复选框自定义样式 - 匹配ExHentai */
+.lc > span {
+  background-color: var(--exh-bg-primary) !important;
+  border: 2px solid var(--exh-border-input) !important;
+}
+
+.lc:hover input:enabled ~ span,
+.lc input:enabled:focus ~ span {
+  background-color: var(--exh-bg-hover) !important;
+  border-color: #aeaeae !important;
+}
+
+.lc input:disabled ~ span {
+  border-color: #5c5c5c !important;
+}
+
+.lc > span:after {
+  border: solid var(--exh-text-primary) !important;
+}
+
+/* 收藏夹页面表单元素 */
+form#favform input[type="text"],
+form#favform input[type="submit"],
+form#favform select {
+  background: var(--exh-bg-input) !important;
+  border: 1px solid var(--exh-border-input) !important;
+  color: var(--exh-text-primary) !important;
+}
+
+form#favform input[type="submit"]:hover,
+input[name="apply"]:hover {
+  background: var(--exh-bg-hover) !important;
+  border-color: var(--exh-border-input) !important;
+}
+
+/* 确认按钮特殊样式 */
+input[name="apply"] {
+  background: var(--exh-bg-input) !important;
+  border: 1px solid var(--exh-border-input) !important;
+  color: var(--exh-text-primary) !important;
+}
+
+/* 收藏夹搜索导航 */
+.searchnav {
+  background: var(--exh-bg-primary) !important;
+  color: var(--exh-text-primary) !important;
+}
+
+/* 收藏夹页面的画廊列表容器 */
+.itg.gld {
+  background: var(--exh-bg-primary) !important;
+}
+
+/* 收藏夹页面的画廊项目 */
+.gl1t, .gl3t, .gl4t {
+  background: var(--exh-bg-secondary) !important;
+  border-color: var(--exh-border-table) !important;
+}
+
+.gl1t:hover, .gl3t:hover, .gl4t:hover {
+  background: var(--exh-bg-hover) !important;
+}
+
+/* 收藏夹页面的画廊名称 */
+.glname {
+  color: var(--exh-text-primary) !important;
+}
+
+.glname a {
+  color: var(--exh-text-secondary) !important;
+}
+
+.glname a:hover {
+  color: var(--exh-text-hover) !important;
+}
+
+/* 收藏夹页面的画廊信息 */
+.gl5t {
+  background: var(--exh-bg-secondary) !important;
+  color: var(--exh-text-primary) !important;
+}
+
+.gl6t {
+  background: var(--exh-bg-secondary) !important;
+  color: var(--exh-text-primary) !important;
+}
+
+/* 收藏夹页面的注释 */
+.glfnote {
+  background: var(--exh-bg-tertiary) !important;
+  border-color: var(--exh-border-secondary) !important;
+  color: var(--exh-text-primary) !important;
+}
+
+/* 收藏夹页面选项组 */
+optgroup {
+  background: var(--exh-bg-secondary) !important;
+  color: var(--exh-text-primary) !important;
+}
+
+option {
+  background: var(--exh-bg-input) !important;
+  color: var(--exh-text-primary) !important;
+}
+
+/* 收藏夹页面的内容容器 */
+div.ido {
+  background: var(--exh-bg-primary) !important;
+}
+
+/* 评分颜色保持不变 */
+a.tup, span.tup {
+  color: #00e639 !important;
+}
+
+a.tdn, span.tdn {
+  color: #ff3333 !important;
+}
+
+/* 错误信息颜色保持不变 */
+.br {
+  color: #ff3333 !important;
+}
+
+/* =========================
+ *   亮色模式覆盖
+ *   只在明确需要亮色时才覆盖暗色样式
+ * ========================= */
+
+/* 固定亮色模式 */
+html[data-eh-theme="light"],
+/* 系统偏好亮色模式 */
+html[data-eh-theme="auto"][data-system-dark="false"] {
+  
+  /* 基础页面颜色覆盖为亮色 */
+  background: var(--eh-bg-primary) !important;
+  color: var(--eh-text-primary) !important;
+}
+
+html[data-eh-theme="light"] body,
+html[data-eh-theme="auto"][data-system-dark="false"] body {
+  background: var(--eh-bg-primary) !important;
+  color: var(--eh-text-primary) !important;
+}
+
+/* 链接颜色覆盖为亮色 */
+html[data-eh-theme="light"] a,
+html[data-eh-theme="auto"][data-system-dark="false"] a {
+  color: var(--eh-text-secondary) !important;
+}
+
+html[data-eh-theme="light"] a:hover,
+html[data-eh-theme="auto"][data-system-dark="false"] a:hover {
+  color: var(--eh-text-hover) !important;
+}
+
+html[data-eh-theme="light"] a:visited .glink,
+html[data-eh-theme="light"] a:active .glink,
+html[data-eh-theme="auto"][data-system-dark="false"] a:visited .glink,
+html[data-eh-theme="auto"][data-system-dark="false"] a:active .glink {
+  color: var(--eh-text-visited) !important;
+}
+
+html[data-eh-theme="light"] a:hover .glink,
+html[data-eh-theme="auto"][data-system-dark="false"] a:hover .glink {
+  color: var(--eh-text-hover) !important;
+}
+
+html[data-eh-theme="light"] .glname a :not(.glink),
+html[data-eh-theme="light"] a .glname :not(.glink),
+html[data-eh-theme="auto"][data-system-dark="false"] .glname a :not(.glink),
+html[data-eh-theme="auto"][data-system-dark="false"] a .glname :not(.glink) {
+  color: var(--eh-text-secondary) !important;
+}
+
+/* 分隔线颜色覆盖 */
+html[data-eh-theme="light"] hr,
+html[data-eh-theme="auto"][data-system-dark="false"] hr {
+  background: var(--eh-text-primary) !important;
+}
+
+/* 输入框覆盖为亮色 */
+html[data-eh-theme="light"] input,
+html[data-eh-theme="light"] select,
+html[data-eh-theme="light"] option,
+html[data-eh-theme="light"] optgroup,
+html[data-eh-theme="light"] textarea,
+html[data-eh-theme="auto"][data-system-dark="false"] input,
+html[data-eh-theme="auto"][data-system-dark="false"] select,
+html[data-eh-theme="auto"][data-system-dark="false"] option,
+html[data-eh-theme="auto"][data-system-dark="false"] optgroup,
+html[data-eh-theme="auto"][data-system-dark="false"] textarea {
+  color: var(--eh-text-primary) !important;
+  background-color: var(--eh-bg-input) !important;
+}
+
+html[data-eh-theme="light"] input[type="button"],
+html[data-eh-theme="light"] input[type="submit"],
+html[data-eh-theme="auto"][data-system-dark="false"] input[type="button"],
+html[data-eh-theme="auto"][data-system-dark="false"] input[type="submit"] {
+  border-color: var(--eh-border-input) !important;
+}
+
+html[data-eh-theme="light"] select,
+html[data-eh-theme="auto"][data-system-dark="false"] select {
+  border-color: var(--eh-border-input) !important;
+}
+
+html[data-eh-theme="light"] input[type="button"]:enabled:hover,
+html[data-eh-theme="light"] input[type="submit"]:enabled:hover,
+html[data-eh-theme="light"] select:enabled:hover,
+html[data-eh-theme="light"] input[type="button"]:enabled:focus,
+html[data-eh-theme="light"] input[type="submit"]:enabled:focus,
+html[data-eh-theme="light"] select:enabled:focus,
+html[data-eh-theme="auto"][data-system-dark="false"] input[type="button"]:enabled:hover,
+html[data-eh-theme="auto"][data-system-dark="false"] input[type="submit"]:enabled:hover,
+html[data-eh-theme="auto"][data-system-dark="false"] select:enabled:hover,
+html[data-eh-theme="auto"][data-system-dark="false"] input[type="button"]:enabled:focus,
+html[data-eh-theme="auto"][data-system-dark="false"] input[type="submit"]:enabled:focus,
+html[data-eh-theme="auto"][data-system-dark="false"] select:enabled:focus {
+  background-color: var(--eh-bg-hover) !important;
+  border-color: #977273 !important;
+}
+
+html[data-eh-theme="light"] input[type="text"],
+html[data-eh-theme="light"] input[type="date"],
+html[data-eh-theme="light"] input[type="password"],
+html[data-eh-theme="light"] textarea,
+html[data-eh-theme="auto"][data-system-dark="false"] input[type="text"],
+html[data-eh-theme="auto"][data-system-dark="false"] input[type="date"],
+html[data-eh-theme="auto"][data-system-dark="false"] input[type="password"],
+html[data-eh-theme="auto"][data-system-dark="false"] textarea {
+  border-color: var(--eh-border-input) !important;
+}
+
+html[data-eh-theme="light"] input:disabled,
+html[data-eh-theme="light"] select:disabled,
+html[data-eh-theme="light"] textarea:disabled,
+html[data-eh-theme="auto"][data-system-dark="false"] input:disabled,
+html[data-eh-theme="auto"][data-system-dark="false"] select:disabled,
+html[data-eh-theme="auto"][data-system-dark="false"] textarea:disabled {
+  color: var(--eh-text-disabled) !important;
+  -webkit-text-fill-color: var(--eh-text-disabled) !important;
+}
+
+html[data-eh-theme="light"] input::placeholder,
+html[data-eh-theme="light"] textarea::placeholder,
+html[data-eh-theme="auto"][data-system-dark="false"] input::placeholder,
+html[data-eh-theme="auto"][data-system-dark="false"] textarea::placeholder {
+  color: #9F746F !important;
+  -webkit-text-fill-color: #9F746F !important;
+}
+
+html[data-eh-theme="light"] input[type="text"]:enabled:hover,
+html[data-eh-theme="light"] input[type="date"]:enabled:hover,
+html[data-eh-theme="light"] input[type="password"]:enabled:hover,
+html[data-eh-theme="light"] textarea:enabled:hover,
+html[data-eh-theme="light"] input[type="text"]:enabled:focus,
+html[data-eh-theme="light"] input[type="date"]:enabled:focus,
+html[data-eh-theme="light"] input[type="password"]:enabled:focus,
+html[data-eh-theme="light"] textarea:enabled:focus,
+html[data-eh-theme="auto"][data-system-dark="false"] input[type="text"]:enabled:hover,
+html[data-eh-theme="auto"][data-system-dark="false"] input[type="date"]:enabled:hover,
+html[data-eh-theme="auto"][data-system-dark="false"] input[type="password"]:enabled:hover,
+html[data-eh-theme="auto"][data-system-dark="false"] textarea:enabled:hover,
+html[data-eh-theme="auto"][data-system-dark="false"] input[type="text"]:enabled:focus,
+html[data-eh-theme="auto"][data-system-dark="false"] input[type="date"]:enabled:focus,
+html[data-eh-theme="auto"][data-system-dark="false"] input[type="password"]:enabled:focus,
+html[data-eh-theme="auto"][data-system-dark="false"] textarea:enabled:focus {
+  background-color: var(--eh-bg-hover) !important;
+}
+
+/* 内容框覆盖为亮色 */
+html[data-eh-theme="light"] .stuffbox,
+html[data-eh-theme="auto"][data-system-dark="false"] .stuffbox {
+  background: var(--eh-bg-secondary) !important;
+  border-color: var(--eh-border-secondary) !important;
+}
+
+html[data-eh-theme="light"] .ido,
+html[data-eh-theme="auto"][data-system-dark="false"] .ido {
+  background: var(--eh-bg-secondary) !important;
+  border-color: var(--eh-border-secondary) !important;
+}
+
+/* 导航栏覆盖为亮色 */
+html[data-eh-theme="light"] #nb,
+html[data-eh-theme="auto"][data-system-dark="false"] #nb {
+  color: var(--eh-text-muted) !important;
+}
+
+html[data-eh-theme="light"] #nb a,
+html[data-eh-theme="auto"][data-system-dark="false"] #nb a {
+  color: var(--eh-text-secondary) !important;
+}
+
+/* 表格覆盖为亮色 */
+html[data-eh-theme="light"] div.itg,
+html[data-eh-theme="auto"][data-system-dark="false"] div.itg {
+  border-top-color: var(--eh-border-primary) !important;
+  border-bottom-color: var(--eh-border-primary) !important;
+}
+
+html[data-eh-theme="light"] table.itg,
+html[data-eh-theme="auto"][data-system-dark="false"] table.itg {
+  border-color: var(--eh-border-primary) !important;
+}
+
+html[data-eh-theme="light"] table.itg > tbody > tr > th,
+html[data-eh-theme="auto"][data-system-dark="false"] table.itg > tbody > tr > th {
+  background: var(--eh-bg-tertiary) !important;
+  color: var(--eh-text-primary) !important;
+}
+
+html[data-eh-theme="light"] table.itg > tbody > tr:nth-child(2n+1),
+html[data-eh-theme="light"] table.itg > tbody > tr:nth-child(2n+1) .glthumb,
+html[data-eh-theme="light"] table.itg > tbody > tr:nth-child(2n+1) .glcut,
+html[data-eh-theme="auto"][data-system-dark="false"] table.itg > tbody > tr:nth-child(2n+1),
+html[data-eh-theme="auto"][data-system-dark="false"] table.itg > tbody > tr:nth-child(2n+1) .glthumb,
+html[data-eh-theme="auto"][data-system-dark="false"] table.itg > tbody > tr:nth-child(2n+1) .glcut {
+  background: var(--eh-bg-row-odd) !important;
+}
+
+html[data-eh-theme="light"] table.itg > tbody > tr:nth-child(2n+2),
+html[data-eh-theme="light"] table.itg > tbody > tr:nth-child(2n+2) .glthumb,
+html[data-eh-theme="light"] table.itg > tbody > tr:nth-child(2n+2) .glcut,
+html[data-eh-theme="auto"][data-system-dark="false"] table.itg > tbody > tr:nth-child(2n+2),
+html[data-eh-theme="auto"][data-system-dark="false"] table.itg > tbody > tr:nth-child(2n+2) .glthumb,
+html[data-eh-theme="auto"][data-system-dark="false"] table.itg > tbody > tr:nth-child(2n+2) .glcut {
+  background: var(--eh-bg-row-even) !important;
+}
+
+html[data-eh-theme="light"] .gl1t:nth-child(2n+1),
+html[data-eh-theme="auto"][data-system-dark="false"] .gl1t:nth-child(2n+1) {
+  background: var(--eh-bg-row-odd) !important;
+}
+
+html[data-eh-theme="light"] .gl1t:nth-child(2n+2),
+html[data-eh-theme="auto"][data-system-dark="false"] .gl1t:nth-child(2n+2) {
+  background: var(--eh-bg-row-even) !important;
+}
+
+/* 收藏夹页面亮色覆盖 - 匹配E-Hentai原版样式 */
+html[data-eh-theme="light"] div.fp,
+html[data-eh-theme="light"] div.fp.eh-dark-favpill,
+html[data-eh-theme="auto"][data-system-dark="false"] div.fp,
+html[data-eh-theme="auto"][data-system-dark="false"] div.fp.eh-dark-favpill {
+  background: transparent !important;
+  border: 1px solid transparent !important;
+  color: var(--eh-text-primary) !important;
+}
+
+html[data-eh-theme="light"] div.fp:hover,
+html[data-eh-theme="light"] div.fp.eh-dark-favpill:hover,
+html[data-eh-theme="auto"][data-system-dark="false"] div.fp:hover,
+html[data-eh-theme="auto"][data-system-dark="false"] div.fp.eh-dark-favpill:hover {
+  background: #F3F0E0 !important;
+  border: 1px solid #C2C1C1 !important;
+}
+
+html[data-eh-theme="light"] div.fp.fps,
+html[data-eh-theme="light"] div.fp.fps.eh-dark-favpill,
+html[data-eh-theme="auto"][data-system-dark="false"] div.fp.fps,
+html[data-eh-theme="auto"][data-system-dark="false"] div.fp.fps.eh-dark-favpill {
+  background: #F3F0E0 !important;
+  border: 1px solid #C2C1C1 !important;
+  color: var(--eh-text-primary) !important;
+}
+
+html[data-eh-theme="light"] div.fp.fps:hover,
+html[data-eh-theme="light"] div.fp.fps.eh-dark-favpill:hover,
+html[data-eh-theme="auto"][data-system-dark="false"] div.fp.fps:hover,
+html[data-eh-theme="auto"][data-system-dark="false"] div.fp.fps.eh-dark-favpill:hover {
+  background: #F3F0E0 !important;
+  border: 1px solid #C2C1C1 !important;
+}
+
+html[data-eh-theme="light"] input[type="checkbox"],
+html[data-eh-theme="auto"][data-system-dark="false"] input[type="checkbox"] {
+  background: var(--eh-bg-input) !important;
+  border: 1px solid var(--eh-border-input) !important;
+  accent-color: var(--eh-text-secondary) !important;
+}
+
+html[data-eh-theme="light"] label.lc,
+html[data-eh-theme="auto"][data-system-dark="false"] label.lc {
+  color: var(--eh-text-primary) !important;
+}
+
+/* 亮色模式复选框自定义样式 */
+html[data-eh-theme="light"] .lc > span,
+html[data-eh-theme="auto"][data-system-dark="false"] .lc > span {
+  background-color: var(--eh-bg-input) !important;
+  border: 2px solid var(--eh-border-input) !important;
+}
+
+html[data-eh-theme="light"] .lc:hover input:enabled ~ span,
+html[data-eh-theme="light"] .lc input:enabled:focus ~ span,
+html[data-eh-theme="auto"][data-system-dark="false"] .lc:hover input:enabled ~ span,
+html[data-eh-theme="auto"][data-system-dark="false"] .lc input:enabled:focus ~ span {
+  background-color: var(--eh-bg-hover) !important;
+  border-color: #977273 !important;
+}
+
+html[data-eh-theme="light"] .lc input:disabled ~ span,
+html[data-eh-theme="auto"][data-system-dark="false"] .lc input:disabled ~ span {
+  border-color: var(--eh-text-disabled) !important;
+}
+
+html[data-eh-theme="light"] .lc > span:after,
+html[data-eh-theme="auto"][data-system-dark="false"] .lc > span:after {
+  border: solid var(--eh-text-primary) !important;
+}
+
+html[data-eh-theme="light"] form#favform input[type="text"],
+html[data-eh-theme="light"] form#favform input[type="submit"],
+html[data-eh-theme="light"] form#favform select,
+html[data-eh-theme="auto"][data-system-dark="false"] form#favform input[type="text"],
+html[data-eh-theme="auto"][data-system-dark="false"] form#favform input[type="submit"],
+html[data-eh-theme="auto"][data-system-dark="false"] form#favform select {
+  background: var(--eh-bg-input) !important;
+  border-color: var(--eh-border-input) !important;
+  color: var(--eh-text-primary) !important;
+}
+
+html[data-eh-theme="light"] form#favform input[type="submit"]:hover,
+html[data-eh-theme="auto"][data-system-dark="false"] form#favform input[type="submit"]:hover {
+  background: var(--eh-bg-hover) !important;
+}
+
+html[data-eh-theme="light"] .searchnav,
+html[data-eh-theme="auto"][data-system-dark="false"] .searchnav {
+  background: var(--eh-bg-primary) !important;
+  color: var(--eh-text-primary) !important;
+}
+
+html[data-eh-theme="light"] .itg.gld,
+html[data-eh-theme="auto"][data-system-dark="false"] .itg.gld {
+  background: var(--eh-bg-primary) !important;
+}
+
+html[data-eh-theme="light"] .gl1t,
+html[data-eh-theme="light"] .gl3t,
+html[data-eh-theme="light"] .gl4t,
+html[data-eh-theme="auto"][data-system-dark="false"] .gl1t,
+html[data-eh-theme="auto"][data-system-dark="false"] .gl3t,
+html[data-eh-theme="auto"][data-system-dark="false"] .gl4t {
+  background: var(--eh-bg-secondary) !important;
+  border-color: var(--eh-border-table) !important;
+}
+
+html[data-eh-theme="light"] .gl1t:hover,
+html[data-eh-theme="light"] .gl3t:hover,
+html[data-eh-theme="light"] .gl4t:hover,
+html[data-eh-theme="auto"][data-system-dark="false"] .gl1t:hover,
+html[data-eh-theme="auto"][data-system-dark="false"] .gl3t:hover,
+html[data-eh-theme="auto"][data-system-dark="false"] .gl4t:hover {
+  background: var(--eh-bg-hover) !important;
+}
+
+html[data-eh-theme="light"] .glname,
+html[data-eh-theme="auto"][data-system-dark="false"] .glname {
+  color: var(--eh-text-primary) !important;
+}
+
+html[data-eh-theme="light"] .glname a,
+html[data-eh-theme="auto"][data-system-dark="false"] .glname a {
+  color: var(--eh-text-secondary) !important;
+}
+
+html[data-eh-theme="light"] .glname a:hover,
+html[data-eh-theme="auto"][data-system-dark="false"] .glname a:hover {
+  color: var(--eh-text-hover) !important;
+}
+
+html[data-eh-theme="light"] .gl5t,
+html[data-eh-theme="auto"][data-system-dark="false"] .gl5t {
+  background: var(--eh-bg-secondary) !important;
+  color: var(--eh-text-primary) !important;
+}
+
+html[data-eh-theme="light"] .gl6t,
+html[data-eh-theme="auto"][data-system-dark="false"] .gl6t {
+  background: var(--eh-bg-secondary) !important;
+  color: var(--eh-text-primary) !important;
+}
+
+html[data-eh-theme="light"] .glfnote,
+html[data-eh-theme="auto"][data-system-dark="false"] .glfnote {
+  background: var(--eh-bg-tertiary) !important;
+  border-color: var(--eh-border-secondary) !important;
+  color: var(--eh-text-primary) !important;
+}
+
+html[data-eh-theme="light"] optgroup,
+html[data-eh-theme="auto"][data-system-dark="false"] optgroup {
+  background: var(--eh-bg-secondary) !important;
+  color: var(--eh-text-primary) !important;
+}
+
+html[data-eh-theme="light"] option,
+html[data-eh-theme="auto"][data-system-dark="false"] option {
+  background: var(--eh-bg-input) !important;
+  color: var(--eh-text-primary) !important;
+}
+
+html[data-eh-theme="light"] div.ido,
+html[data-eh-theme="auto"][data-system-dark="false"] div.ido {
+  background: var(--eh-bg-primary) !important;
+}
+
+} /* 结束 @-moz-document */
