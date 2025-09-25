@@ -1,7 +1,7 @@
 // ==UserScript==
-// @name         E-Hentai → ExHentai 功能增强
-// @name:en      E-Hentai → ExHentai Functions Enhancement
-// @namespace    https://greasyfork.org/users/1508871-vesper233
+// @name         E-Hentai 功能增强
+// @name:en      E-Hentai Functions Enhancement
+// @namespace    https://greasyfork.org/zh-CN/users/1508871-vesper233
 // @version      5.2.0
 // @description  让 E-Hentai 拥有 ExHentai 风格的功能增强 (悬浮按钮、快捷键、主题切换)
 // @description:en Make E-Hentai work like ExHentai with enhanced functions (floating buttons, shortcuts, theme switching)
