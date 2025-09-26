@@ -4,7 +4,7 @@
 @namespace    https://greasyfork.org/zh-CN/users/1508871-vesper233
 @description  E-Hentai 主题切换，支持暗色模式、亮色模式和自动模式（不适用于论坛）
 @description:en E-Hentai Theme Switcher, support dark mode, light mode and auto mode (not for forums)
-@version      5.3.1
+@version      5.3.2
 @author       Vesper233
 @license      MIT
 @preprocessor stylus
@@ -33,7 +33,7 @@
 :root {
   /* ExHentai 真实颜色 */
   --exh-bg-primary: #34353b;      /* 主背景 */
-  --exh-bg-secondary: #4f535b;    /* 内容框背景 */
+  /* --exh-bg-secondary: #4f535b;    内容框背景 */
   --exh-bg-tertiary: #40454b;     /* 表头背景 */
   --exh-bg-row-odd: #363940;      /* 奇数行 */
   --exh-bg-row-even: #3c414b;     /* 偶数行 */
