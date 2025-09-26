@@ -2,15 +2,30 @@
 @name         E-Hentai 主题切换
 @name:en      E-Hentai Theme Switcher
 @namespace    https://greasyfork.org/zh-CN/users/1508871-vesper233
-@description  E-Hentai 主题切换，支持暗色模式、亮色模式和自动模式
-@description:en E-Hentai Theme Switcher, support dark mode, light mode and auto mode
-@version      5.3.0
+@description  E-Hentai 主题切换，支持暗色模式、亮色模式和自动模式（不适用于论坛）
+@description:en E-Hentai Theme Switcher, support dark mode, light mode and auto mode (not for forums)
+@version      5.3.1
 @author       Vesper233
 @license      MIT
 @preprocessor stylus
 ==/UserStyle== */
 
-@-moz-document domain("e-hentai.org"), domain("upload.e-hentai.org") {
+/* 
+ * 重要提示：此样式表仅适用于 E-Hentai 主站和上传页面
+ * 不应该应用到 forums.e-hentai.org 论坛页面
+ * Important: This stylesheet is only for E-Hentai main site and upload pages
+ * Should NOT be applied to forums.e-hentai.org forum pages
+ */
+
+@-moz-document url-prefix("https://e-hentai.org/"), url-prefix("http://e-hentai.org/"), url-prefix("https://upload.e-hentai.org/"), url-prefix("http://upload.e-hentai.org/") {
+
+/* 
+ * 域名检查 - 确保不在论坛页面应用样式
+ * 使用安全的方式检测论坛页面，避免隐藏整个页面
+ */
+
+/* 论坛页面检测 - 仅在确认为论坛页面时禁用样式 */
+/* 注意：移除了危险的 display: none 规则，改用更安全的方式 */
 
 /* =========================
  *   ExHentai 颜色变量
